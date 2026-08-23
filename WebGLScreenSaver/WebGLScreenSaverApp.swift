@@ -1,9 +1,3 @@
-//
-//  AppexSaverMinimalApp.swift
-//  AppexSaverMinimal
-//
-//  Copyright © 2026 Guillaume Louel. Licensed under the MIT License.
-//
 //  Host application for the screensaver extension. The host app exists so the
 //  .appex can be bundled and registered with pluginkit; macOS does not load
 //  appex bundles that aren't embedded inside an application.
@@ -12,14 +6,14 @@
 import SwiftUI
 
 @main
-struct AppexSaverMinimalApp: App {
+struct WebGLScreenSaverApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WindowMainView()
         }
 
         Window("Preview", id: "preview") {
-            PreviewViewRepresentable()
+            CoreView()
                 .ignoresSafeArea()
         }
         .defaultSize(width: 640, height: 480)

@@ -15,9 +15,9 @@
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "1A00001A000000000000000A"
-                     BuildableName = "AppexSaverMinimal.app"
-                     BlueprintName = "AppexSaverMinimal"
-                     ReferencedContainer = "container:AppexSaverMinimal.xcodeproj">
+                     BuildableName = "WebGLScreenSaver.app"
+                     BlueprintName = "WebGLScreenSaver"
+                     ReferencedContainer = "container:WebGLScreenSaver.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1A00001A000000000000000A"
-               BuildableName = "AppexSaverMinimal.app"
-               BlueprintName = "AppexSaverMinimal"
-               ReferencedContainer = "container:AppexSaverMinimal.xcodeproj">
+               BuildableName = "WebGLScreenSaver.app"
+               BlueprintName = "WebGLScreenSaver"
+               ReferencedContainer = "container:WebGLScreenSaver.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1A00001A000000000000000A"
-            BuildableName = "AppexSaverMinimal.app"
-            BlueprintName = "AppexSaverMinimal"
-            ReferencedContainer = "container:AppexSaverMinimal.xcodeproj">
+            BuildableName = "WebGLScreenSaver.app"
+            BlueprintName = "WebGLScreenSaver"
+            ReferencedContainer = "container:WebGLScreenSaver.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -79,9 +79,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1A00001A000000000000000A"
-            BuildableName = "AppexSaverMinimal.app"
-            BlueprintName = "AppexSaverMinimal"
-            ReferencedContainer = "container:AppexSaverMinimal.xcodeproj">
+            BuildableName = "WebGLScreenSaver.app"
+            BlueprintName = "WebGLScreenSaver"
+            ReferencedContainer = "container:WebGLScreenSaver.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

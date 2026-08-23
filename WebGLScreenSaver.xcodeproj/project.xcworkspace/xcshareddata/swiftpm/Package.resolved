@@ -1,5 +1,5 @@
 {
-  "originHash" : "58d483173683d9748f852a167c8263542e3ef789aabcff2c1cc4cc0b5dad32d0",
+  "originHash" : "1f16cf9bb4c388c352da407405ef146490922ecaf73c966c7f07939b009b535d",
   "pins" : [
     {
       "identity" : "papersaver",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "c5d11a805e765f52ba34ec7284bd4fcd6ba68615",
         "version" : "1.7.0"
+      }
+    },
+    {
+      "identity" : "swiftlintplugins",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SimplyDanny/SwiftLintPlugins",
+      "state" : {
+        "revision" : "ef7d692fc6706e8f5628e26bcafaefa445c58a97",
+        "version" : "0.65.1"
       }
     }
   ],

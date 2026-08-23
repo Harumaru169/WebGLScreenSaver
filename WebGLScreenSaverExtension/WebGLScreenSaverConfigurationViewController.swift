@@ -1,13 +1,7 @@
-//
-//  AppexSaverMinimalConfigurationViewController.swift
-//  AppexSaverMinimalExtension
-//
-//  Copyright © 2026 Guillaume Louel. Licensed under the MIT License.
-//
 //  Configuration sheet displayed when the user clicks "Options" next to the
 //  screensaver in System Settings. Specified as
 //  ScreenSaverConfigurationSheetViewControllerClass in Info.plist as
-//  `$(PRODUCT_MODULE_NAME).AppexSaverMinimalConfigurationViewController`.
+//  `$(PRODUCT_MODULE_NAME).WebGLScreenSaverConfigurationViewController`.
 //
 //  This sample has no real configuration; it shows the bare minimum needed
 //  for the sheet to dismiss cleanly. SwiftUI works here too — wrap your
@@ -18,8 +12,8 @@ import AppKit
 
 private let logger = AppexLog.logger("Configuration")
 
-@objc(AppexSaverMinimalConfigurationViewController)
-class AppexSaverMinimalConfigurationViewController: NSViewController {
+@objc(WebGLScreenSaverConfigurationViewController)
+class WebGLScreenSaverConfigurationViewController: NSViewController {
 
     override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
         logger.info("init(nibName:bundle:)")
@@ -36,7 +30,7 @@ class AppexSaverMinimalConfigurationViewController: NSViewController {
 
         let container = NSView(frame: NSRect(x: 0, y: 0, width: 300, height: 120))
 
-        let label = NSTextField(labelWithString: "AppexSaverMinimal")
+        let label = NSTextField(labelWithString: "WebGLScreenSaver")
         label.font = NSFont.systemFont(ofSize: 18, weight: .medium)
         label.alignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false

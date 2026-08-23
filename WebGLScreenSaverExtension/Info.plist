@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>AppexSaverMinimal</string>
+	<string>WebGLScreenSaver</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,15 +29,15 @@
 		<key>NSExtensionPointVersion</key>
 		<string>1.0</string>
 		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).AppexSaverMinimalExtension</string>
+		<string>$(PRODUCT_MODULE_NAME).WebGLScreenSaverExtension</string>
 	</dict>
 	<key>SSEHasConfigureSheet</key>
 	<true/>
 	<key>SSENeedsAnimationTimer</key>
 	<false/>
 	<key>ScreenSaverConfigurationSheetViewControllerClass</key>
-	<string>$(PRODUCT_MODULE_NAME).AppexSaverMinimalConfigurationViewController</string>
+	<string>$(PRODUCT_MODULE_NAME).WebGLScreenSaverConfigurationViewController</string>
 	<key>ScreenSaverViewControllerClass</key>
-	<string>$(PRODUCT_MODULE_NAME).AppexSaverMinimalViewController</string>
+	<string>$(PRODUCT_MODULE_NAME).WebGLScreenSaverViewController</string>
 </dict>
 </plist>

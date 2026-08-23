@@ -1,9 +1,3 @@
-//
-//  ContentView.swift
-//  AppexSaverMinimal
-//
-//  Copyright © 2026 Guillaume Louel. Licensed under the MIT License.
-//
 //  Main view for the host application. Shows extension registration status
 //  and provides install / uninstall and "set as active screensaver" actions.
 //
@@ -12,7 +6,7 @@ import SwiftUI
 
 private let logger = AppexLog.logger("HostApp")
 
-struct ContentView: View {
+struct WindowMainView: View {
     @Environment(\.openWindow) private var openWindow
     @StateObject private var pluginManager = PluginManager()
     @State private var statusMessage = "Ready"
@@ -24,7 +18,7 @@ struct ContentView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.accentColor)
 
-            Text("AppexSaverMinimal")
+            Text("WebGL ScreenSaver")
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
@@ -85,7 +79,9 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Circle()
-                        .fill(pluginManager.isInstalled ? Color.green : Color.gray)
+                        .fill(
+                            pluginManager.isInstalled ? Color.green : Color.gray
+                        )
                         .frame(width: 10, height: 10)
 
                     if pluginManager.isInstalled {
@@ -119,15 +115,20 @@ struct ContentView: View {
 
                 if pluginManager.isInstalled {
                     if let path = pluginManager.installedPath {
-                        HStack(alignment: .top) {
-                            Text("Path:")
-                                .foregroundColor(.secondary)
-                            Text(path)
-                                .lineLimit(2)
-                                .truncationMode(.middle)
-                                .textSelection(.enabled)
+                        //                        HStack(alignment: .top) {
+                        ScrollView(.horizontal) {
+                            HStack(alignment: .top) {
+                                Text("Path:")
+                                    .foregroundColor(.secondary)
+                                Text(path)
+                                    //                                .lineLimit(2)
+                                    //                                .truncationMode(.middle)
+                                    .textSelection(.enabled)
+                            }
+                            .padding(.vertical)
                         }
                         .font(.caption)
+                        .frame(maxWidth: 500)
                     }
                 } else {
                     if let embeddedVersion = pluginManager.embeddedVersion {
@@ -172,7 +173,10 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Circle()
-                        .fill(pluginManager.isActiveScreensaver ? Color.green : Color.gray)
+                        .fill(
+                            pluginManager.isActiveScreensaver
+                                ? Color.green : Color.gray
+                        )
                         .frame(width: 10, height: 10)
 
                     if pluginManager.isActiveScreensaver {
@@ -206,7 +210,8 @@ struct ContentView: View {
                         .foregroundColor(.red)
                 }
 
-                if pluginManager.isInstalled && !pluginManager.isActiveScreensaver {
+                if pluginManager.isInstalled
+                    && !pluginManager.isActiveScreensaver {
                     HStack {
                         Spacer()
                         Button("Enable as Screensaver") {
@@ -232,7 +237,9 @@ struct ContentView: View {
             statusMessage = "Extension installed successfully"
         } catch {
             statusMessage = "Install failed: \(error.localizedDescription)"
-            logger.error("Install failed: \(error.localizedDescription, privacy: .public)")
+            logger.error(
+                "Install failed: \(error.localizedDescription, privacy: .public)"
+            )
         }
     }
 
@@ -243,17 +250,23 @@ struct ContentView: View {
             statusMessage = "Extension uninstalled successfully"
         } catch {
             statusMessage = "Uninstall failed: \(error.localizedDescription)"
-            logger.error("Uninstall failed: \(error.localizedDescription, privacy: .public)")
+            logger.error(
+                "Uninstall failed: \(error.localizedDescription, privacy: .public)"
+            )
         }
     }
 
     private func openScreenSaverSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.ScreenSaver-Settings.extension") {
+        if let url = URL(
+            string:
+                "x-apple.systempreferences:com.apple.ScreenSaver-Settings.extension"
+        ) {
             NSWorkspace.shared.open(url)
         }
     }
+
 }
 
 #Preview {
-    ContentView()
+    WindowMainView()
 }
