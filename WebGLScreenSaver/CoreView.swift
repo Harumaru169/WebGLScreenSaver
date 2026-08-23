@@ -18,7 +18,7 @@ struct CoreView: View {
                     .onAppear {
                         displayLink.start {
                             // Update position of the image
-                            time += 0.03
+                            time += 0.03 * Double(SharedSettings.timeScale)
                         }
                     }
                     .onDisappear {

@@ -24,6 +24,8 @@
 		735F141D303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
 		735F141F303AA2220007EA17 /* DisplayLinkReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141E303AA2220007EA17 /* DisplayLinkReader.swift */; };
 		735F1420303AA2220007EA17 /* DisplayLinkReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141E303AA2220007EA17 /* DisplayLinkReader.swift */; };
+		7A000001000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
+		7A000002000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +75,7 @@
 		731972F0303ADE63001F9FE3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		735F141B303A0E550007EA17 /* CoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreView.swift; sourceTree = "<group>"; };
 		735F141E303AA2220007EA17 /* DisplayLinkReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayLinkReader.swift; sourceTree = "<group>"; };
+		7A000003000000000000000A /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +117,7 @@
 				1A000001000000000000000B /* WebGLScreenSaverApp.swift */,
 				735F141B303A0E550007EA17 /* CoreView.swift */,
 				735F141E303AA2220007EA17 /* DisplayLinkReader.swift */,
+				7A000003000000000000000A /* SharedSettings.swift */,
 				1A000002000000000000000B /* WindowMainView.swift */,
 				1A000032000000000000000B /* PluginManager.swift */,
 				1A00000A000000000000000B /* Info.plist */,
@@ -324,6 +328,7 @@
 				735F141C303A0E550007EA17 /* CoreView.swift in Sources */,
 				1A000066000000000000000A /* Logger.swift in Sources */,
 				735F141F303AA2220007EA17 /* DisplayLinkReader.swift in Sources */,
+				7A000001000000000000000A /* SharedSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,6 +343,7 @@
 				735F1420303AA2220007EA17 /* DisplayLinkReader.swift in Sources */,
 				1A000067000000000000000A /* Logger.swift in Sources */,
 				735F141D303A0E550007EA17 /* CoreView.swift in Sources */,
+				7A000002000000000000000A /* SharedSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,10 +484,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WebGLScreenSaver/WebGLScreenSaver.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = BVRR3L2WCF;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -495,6 +501,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kosei.haruyama.WebGLScreenSaver;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -506,10 +513,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WebGLScreenSaver/WebGLScreenSaver.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = BVRR3L2WCF;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -523,6 +530,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kosei.haruyama.WebGLScreenSaver;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -533,7 +541,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = WebGLScreenSaverExtension/WebGLScreenSaverExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = BVRR3L2WCF;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -558,6 +566,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kosei.haruyama.WebGLScreenSaver.Extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WebGLScreenSaverExtension/Bridging-Header.h";
@@ -570,7 +579,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = WebGLScreenSaverExtension/WebGLScreenSaverExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = BVRR3L2WCF;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -595,6 +604,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = kosei.haruyama.WebGLScreenSaver.Extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WebGLScreenSaverExtension/Bridging-Header.h";

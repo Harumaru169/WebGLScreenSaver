@@ -10,6 +10,7 @@ struct WindowMainView: View {
     @Environment(\.openWindow) private var openWindow
     @StateObject private var pluginManager = PluginManager()
     @State private var statusMessage = "Ready"
+    @State private var timeScale = SharedSettings.timeScale
 
     var body: some View {
         VStack(spacing: 20) {
@@ -49,6 +50,16 @@ struct WindowMainView: View {
             Divider()
                 .padding(.horizontal, 40)
 
+            // MARK: - Animation Speed
+            Text("Animation Speed")
+                .font(.headline)
+
+            animationSpeedView
+                .padding(.horizontal, 20)
+
+            Divider()
+                .padding(.horizontal, 40)
+
             // MARK: - Actions
             HStack(spacing: 12) {
                 Button("Open Preview") {
@@ -71,6 +82,39 @@ struct WindowMainView: View {
         }
         .padding(40)
         .fixedSize()
+    }
+
+    @ViewBuilder
+    private var animationSpeedView: some View {
+        GroupBox {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Time Scale")
+                    Spacer()
+                    Text("\(timeScale, specifier: "%.1f")×")
+                        .monospacedDigit()
+                }
+
+                HStack {
+                    Text("1×")
+                        .foregroundColor(.secondary)
+
+                    Slider(value: $timeScale, in: 1.0...3.0, step: 0.1)
+                        .frame(width: 300)
+
+                    Text("3×")
+                        .foregroundColor(.secondary)
+                }
+
+                Text("Used by both the app preview and the screen saver extension.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(8)
+        }
+        .onChange(of: timeScale) { _, newValue in
+            SharedSettings.timeScale = newValue
+        }
     }
 
     @ViewBuilder
