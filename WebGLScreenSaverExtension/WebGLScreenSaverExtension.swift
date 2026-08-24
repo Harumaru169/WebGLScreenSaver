@@ -10,10 +10,9 @@
 import Foundation
 import ScreenSaver
 
-private let logger = AppexLog.logger("Extension")
-
 @objc(WebGLScreenSaverExtension)
 class WebGLScreenSaverExtension: ScreenSaverExtension {
+    private let logger = AppexLog.extensionLogger
 
     @objc override init() {
         logger.info("WebGLScreenSaverExtension.init() PID=\(ProcessInfo.processInfo.processIdentifier, privacy: .public)")

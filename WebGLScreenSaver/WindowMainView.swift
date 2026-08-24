@@ -1,284 +1,339 @@
-//  Main view for the host application. Shows extension registration status
-//  and provides install / uninstall and "set as active screensaver" actions.
-//
-
+import AppKit
 import SwiftUI
 
-private let logger = AppexLog.logger("HostApp")
+private let logger = AppexLog.hostAppLogger
 
+@MainActor
 struct WindowMainView: View {
     @Environment(\.openWindow) private var openWindow
     @StateObject private var pluginManager = PluginManager()
+    @StateObject private var sourceStore = ShaderSourceStore()
+    @StateObject private var shaderRuntime = ShaderRuntimeController()
+
     @State private var statusMessage = "Ready"
+    @State private var shaderMessage = "Showing the applied shader."
+    @State private var shaderLog = ""
     @State private var timeScale = SharedSettings.timeScale
+    @State private var isApplying = false
+    @State private var draftSaveTask: Task<Void, Never>?
 
     var body: some View {
-        VStack(spacing: 20) {
-            // MARK: - Header
-            Image(systemName: "tv")
-                .font(.system(size: 60))
-                .foregroundColor(.accentColor)
+        VStack(spacing: 14) {
+            header
+            extensionControls
 
-            Text("WebGL ScreenSaver")
-                .font(.largeTitle)
-                .fontWeight(.bold)
+            HSplitView {
+                shaderEditor
+                    .frame(minWidth: 440, idealWidth: 560)
 
-            Text("Screensaver Extension")
-                .font(.title2)
-                .foregroundColor(.secondary)
-
-            Divider()
-                .padding(.horizontal, 40)
-
-            // MARK: - Extension Status
-            Text("Extension Status")
-                .font(.headline)
-
-            extensionStatusView
-                .padding(.horizontal, 20)
-
-            Divider()
-                .padding(.horizontal, 40)
-
-            // MARK: - Screensaver Activation
-            Text("Screensaver Activation")
-                .font(.headline)
-
-            screensaverActivationView
-                .padding(.horizontal, 20)
-
-            Divider()
-                .padding(.horizontal, 40)
-
-            // MARK: - Animation Speed
-            Text("Animation Speed")
-                .font(.headline)
-
-            animationSpeedView
-                .padding(.horizontal, 20)
-
-            Divider()
-                .padding(.horizontal, 40)
-
-            // MARK: - Actions
-            HStack(spacing: 12) {
-                Button("Open Preview") {
-                    openWindow(id: "preview")
-                }
-                .buttonStyle(.borderedProminent)
-
-                Button("Open Screen Saver Settings") {
-                    openScreenSaverSettings()
-                }
-                .buttonStyle(.bordered)
+                previewPanel
+                    .frame(minWidth: 480, idealWidth: 680)
             }
 
             Text(statusMessage)
                 .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.top, 10)
-                .frame(maxWidth: .infinity)
-                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(40)
-        .fixedSize()
+        .padding(16)
+        .frame(minWidth: 1_000, minHeight: 680)
+        .onChange(of: sourceStore.draftSource) { _, _ in
+            scheduleDraftSave()
+        }
+        .onDisappear {
+            draftSaveTask?.cancel()
+            sourceStore.persistDraft()
+        }
     }
 
-    @ViewBuilder
-    private var animationSpeedView: some View {
-        GroupBox {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text("Time Scale")
-                    Spacer()
-                    Text("\(timeScale, specifier: "%.1f")×")
-                        .monospacedDigit()
-                }
+    private var header: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles.tv")
+                .font(.system(size: 32))
+                .foregroundStyle(.tint)
 
-                HStack {
-                    Text("1×")
-                        .foregroundColor(.secondary)
-
-                    Slider(value: $timeScale, in: 1.0...3.0, step: 0.1)
-                        .frame(width: 300)
-
-                    Text("3×")
-                        .foregroundColor(.secondary)
-                }
-
-                Text("Used by both the app preview and the screen saver extension.")
+            VStack(alignment: .leading, spacing: 2) {
+                Text("WebGL ScreenSaver")
+                    .font(.title.bold())
+                Text("Shadertoy Image shader editor")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
-            .padding(8)
-        }
-        .onChange(of: timeScale) { _, newValue in
-            SharedSettings.timeScale = newValue
+
+            Spacer()
+
+            statusBadge(
+                title: pluginManager.isInstalled ? "Installed" : "Not Installed",
+                color: pluginManager.isInstalled ? .green : .gray
+            )
+            statusBadge(
+                title: pluginManager.isActiveScreensaver ? "Active" : "Not Active",
+                color: pluginManager.isActiveScreensaver ? .green : .gray
+            )
         }
     }
 
-    @ViewBuilder
-    private var extensionStatusView: some View {
+    private var extensionControls: some View {
         GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Circle()
-                        .fill(
-                            pluginManager.isInstalled ? Color.green : Color.gray
-                        )
-                        .frame(width: 10, height: 10)
-
-                    if pluginManager.isInstalled {
-                        Text("Installed")
-                            .fontWeight(.medium)
-                        if let version = pluginManager.installedVersion {
-                            Text("(v\(version))")
-                                .foregroundColor(.secondary)
-                        }
-                    } else {
-                        Text("Not Installed")
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    if pluginManager.isLoading {
-                        ProgressView()
-                            .scaleEffect(0.7)
-                    } else {
-                        Button {
-                            pluginManager.checkInstallationStatus()
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Refresh status")
-                    }
-                }
-
-                if pluginManager.isInstalled {
-                    if let path = pluginManager.installedPath {
-                        //                        HStack(alignment: .top) {
-                        ScrollView(.horizontal) {
-                            HStack(alignment: .top) {
-                                Text("Path:")
-                                    .foregroundColor(.secondary)
-                                Text(path)
-                                    //                                .lineLimit(2)
-                                    //                                .truncationMode(.middle)
-                                    .textSelection(.enabled)
-                            }
-                            .padding(.vertical)
-                        }
-                        .font(.caption)
-                        .frame(maxWidth: 500)
-                    }
-                } else {
-                    if let embeddedVersion = pluginManager.embeddedVersion {
-                        Text("Embedded version: \(embeddedVersion)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                if let error = pluginManager.lastError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
-
-                HStack {
-                    Spacer()
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
                     if pluginManager.isInstalled {
                         Button("Uninstall") {
                             uninstallExtension()
                         }
-                        .buttonStyle(.bordered)
-                        .disabled(pluginManager.isLoading)
                     } else {
                         Button("Install") {
                             installExtension()
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(pluginManager.isLoading)
                     }
+
+                    Button("Enable as Screen Saver") {
+                        Task {
+                            await pluginManager.enableAsScreensaver()
+                        }
+                    }
+                    .disabled(
+                        !pluginManager.isInstalled
+                            || pluginManager.isActiveScreensaver
+                            || pluginManager.isCheckingScreensaver
+                    )
+
+                    Button("Open Preview") {
+                        openWindow(id: "preview")
+                    }
+
+                    Button("Open Screen Saver Settings") {
+                        openScreenSaverSettings()
+                    }
+
                     Spacer()
+
+                    if pluginManager.isLoading
+                        || pluginManager.isCheckingScreensaver {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+
+                    Button {
+                        pluginManager.checkInstallationStatus()
+                        pluginManager.checkScreensaverStatus()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Refresh extension status")
                 }
-                .padding(.top, 4)
+
+                if let path = pluginManager.installedPath {
+                    Text(path)
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .textSelection(.enabled)
+                }
+
+                if let error = pluginManager.lastError
+                    ?? pluginManager.screensaverError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
             }
-            .padding(8)
+            .padding(4)
+        } label: {
+            Text("Screen Saver Extension")
         }
     }
 
-    @ViewBuilder
-    private var screensaverActivationView: some View {
+    private var shaderEditor: some View {
         GroupBox {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Circle()
-                        .fill(
-                            pluginManager.isActiveScreensaver
-                                ? Color.green : Color.gray
-                        )
-                        .frame(width: 10, height: 10)
+                        .fill(sourceStore.hasUnappliedChanges ? .orange : .green)
+                        .frame(width: 9, height: 9)
+                    Text(
+                        sourceStore.hasUnappliedChanges
+                            ? "Draft has unapplied changes"
+                            : "Draft matches the applied shader"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    Spacer()
+                }
 
-                    if pluginManager.isActiveScreensaver {
-                        Text("Active")
-                            .fontWeight(.medium)
-                    } else {
-                        Text("Not Active")
-                            .fontWeight(.medium)
-                            .foregroundColor(.secondary)
+                TextEditor(text: $sourceStore.draftSource)
+                    .font(.system(size: 12, design: .monospaced))
+                    .scrollContentBackground(.hidden)
+                    .background(Color(nsColor: .textBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(.separator, lineWidth: 1)
                     }
+
+                HStack(spacing: 8) {
+                    Button("Apply") {
+                        applyShader()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isApplying || !sourceStore.hasUnappliedChanges)
+
+                    Button("Revert") {
+                        sourceStore.revertDraft()
+                        shaderMessage = "Draft reverted to the applied shader."
+                        shaderLog = ""
+                    }
+                    .disabled(isApplying || !sourceStore.hasUnappliedChanges)
+
+                    Button("Reset to Seascape") {
+                        sourceStore.resetDraftToDefault()
+                        shaderMessage = "Default shader loaded into the draft. Apply to activate it."
+                        shaderLog = ""
+                    }
+                    .disabled(isApplying)
 
                     Spacer()
 
-                    if pluginManager.isCheckingScreensaver {
+                    if isApplying {
                         ProgressView()
-                            .scaleEffect(0.7)
-                    } else {
-                        Button {
-                            pluginManager.checkScreensaverStatus()
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Refresh status")
+                            .controlSize(.small)
                     }
                 }
 
-                if let error = pluginManager.screensaverError {
-                    Text(error)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(shaderMessage)
                         .font(.caption)
-                        .foregroundColor(.red)
-                }
+                        .foregroundStyle(shaderLog.isEmpty ? .secondary : .primary)
 
-                if pluginManager.isInstalled
-                    && !pluginManager.isActiveScreensaver {
-                    HStack {
-                        Spacer()
-                        Button("Enable as Screensaver") {
-                            Task {
-                                await pluginManager.enableAsScreensaver()
-                            }
+                    if !shaderLog.isEmpty {
+                        ScrollView {
+                            Text(shaderLog)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(pluginManager.isCheckingScreensaver)
-                        Spacer()
+                        .frame(maxHeight: 90)
+                        .padding(8)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
                     }
-                    .padding(.top, 4)
                 }
             }
-            .padding(8)
+            .padding(4)
+        } label: {
+            Text("GLSL Source")
+        }
+    }
+
+    private var previewPanel: some View {
+        GroupBox {
+            VStack(spacing: 10) {
+                CoreView(
+                    runtime: shaderRuntime,
+                    shaderSource: sourceStore.activeSource,
+                    showsDiagnostics: true
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(.separator, lineWidth: 1)
+                }
+
+                HStack(spacing: 10) {
+                    Text("Time Scale")
+                    Slider(value: $timeScale, in: 0.1...3.0, step: 0.1)
+                    Text("\(timeScale, specifier: "%.1f")×")
+                        .monospacedDigit()
+                        .frame(width: 42, alignment: .trailing)
+                }
+                .onChange(of: timeScale) { _, newValue in
+                    SharedSettings.timeScale = newValue
+                    Task {
+                        await shaderRuntime.setTimeScale(Double(newValue))
+                    }
+                }
+            }
+            .padding(4)
+        } label: {
+            HStack {
+                Text("Applied Shader Preview")
+                Spacer()
+                runtimeStateLabel
+            }
+        }
+    }
+
+    private var runtimeStateLabel: some View {
+        Group {
+            switch shaderRuntime.state {
+            case .idle:
+                Text("Idle")
+            case .loading:
+                Text("Loading…")
+            case .ready:
+                Text("Ready")
+            case .rendering:
+                Text("Rendering")
+            case .compileError:
+                Text("Compile Error")
+                    .foregroundStyle(.red)
+            case .runtimeError:
+                Text("Runtime Error")
+                    .foregroundStyle(.red)
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+    }
+
+    private func statusBadge(title: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(title)
+                .font(.caption)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(.quaternary, in: Capsule())
+    }
+
+    private func scheduleDraftSave() {
+        draftSaveTask?.cancel()
+        draftSaveTask = Task {
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else {
+                return
+            }
+            sourceStore.persistDraft()
+        }
+    }
+
+    private func applyShader() {
+        isApplying = true
+        shaderMessage = "Compiling shader…"
+        shaderLog = ""
+
+        Task {
+            let result = await sourceStore.applyDraft { source in
+                await shaderRuntime.compile(source: source)
+            }
+            shaderLog = result.log
+            shaderMessage = result.success
+                ? "Shader compiled and applied successfully."
+                : "The draft was not applied. The previous shader is still active."
+            isApplying = false
         }
     }
 
     private func installExtension() {
-        statusMessage = "Installing extension..."
+        statusMessage = "Installing extension…"
         do {
             try pluginManager.install()
-            statusMessage = "Extension installed successfully"
+            statusMessage = "Extension installed successfully."
         } catch {
             statusMessage = "Install failed: \(error.localizedDescription)"
             logger.error(
@@ -288,10 +343,10 @@ struct WindowMainView: View {
     }
 
     private func uninstallExtension() {
-        statusMessage = "Uninstalling extension..."
+        statusMessage = "Uninstalling extension…"
         do {
             try pluginManager.uninstall()
-            statusMessage = "Extension uninstalled successfully"
+            statusMessage = "Extension uninstalled successfully."
         } catch {
             statusMessage = "Uninstall failed: \(error.localizedDescription)"
             logger.error(
@@ -301,14 +356,13 @@ struct WindowMainView: View {
     }
 
     private func openScreenSaverSettings() {
-        if let url = URL(
-            string:
-                "x-apple.systempreferences:com.apple.ScreenSaver-Settings.extension"
-        ) {
-            NSWorkspace.shared.open(url)
+        guard let url = URL(
+            string: "x-apple.systempreferences:com.apple.ScreenSaver-Settings.extension"
+        ) else {
+            return
         }
+        NSWorkspace.shared.open(url)
     }
-
 }
 
 #Preview {

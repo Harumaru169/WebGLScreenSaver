@@ -1,16 +1,33 @@
-# AppexSaverMinimal
+# WebGLScreenSaver
 
-A minimal sample project for building a macOS screensaver as an **`.appex` extension** (the modern XPC-based ExtensionKit format introduced in macOS Sonoma), maintained by [Guillaume Louel](https://github.com/glouel).
+A SwiftUI macOS app that turns a Shadertoy Image shader into an **`.appex` screen saver extension**. It is based on Guillaume Louel's [AppexSaverMinimal](https://github.com/AerialScreensaver/AppexSaverMinimal) project.
 
 Use this as a starting point for your own Appex screensaver. The companion project [ScreenSaverMinimal](https://github.com/AerialScreensaver/ScreenSaverMinimal) covers the legacy `.saver` plug-in format for comparison.
 
 ## What this sample shows
 
 - A complete host app + `.appex` extension wired up to build, sign, and install
-- A six-color rainbow fallback (matching [Aerial](https://github.com/AerialScreensaver/Aerial)'s fallback view) driven by `CABasicAnimation`
+- A WebGL2 Shadertoy-compatible Image shader runtime hosted by `WKWebView`
+- A side-by-side GLSL editor and live preview with compile-before-apply behavior
+- Shared App Group settings for draft source, applied source, and animation speed
 - Programmatic registration via `pluginkit` and activation via [PaperSaver](https://github.com/AerialScreensaver/PaperSaver)
 - Shared rendering code between the screensaver and an in-app preview window
-- A configuration sheet stub that you can extend with SwiftUI or AppKit
+- The bundled Seascape shader as the initial screen saver
+
+The extension creates one `WKWebView` per display from ScreenSaver.framework's
+animation lifecycle. It uses `startAnimation()` as the primary startup signal
+and keeps the framework's 30 fps animation timer enabled so `animateOneFrame()`
+can start displays that miss that callback. A visibly attached AppKit window is
+also accepted as a startup signal for previews.
+
+The shader normally uses `requestAnimationFrame`. Remote screen-saver windows
+can be reported as hidden to WebKit even while their pixels are on screen, so
+the extension detects a hidden or stalled page and switches only that display
+to explicit WebGL draws from `animateOneFrame()`. It also disables WebKit
+window-occlusion detection for the screen saver view hierarchy. That selector
+is private and therefore needs review before Mac App Store distribution. The
+runtime is torn down on `stopAnimation()` or window detachment, and navigation
+outside the bundled runtime remains blocked by the navigation delegate.
 
 See [BACKGROUND.md](BACKGROUND.md) for detailed technical notes on the Appex screensaver architecture.
 
@@ -18,8 +35,8 @@ See [BACKGROUND.md](BACKGROUND.md) for detailed technical notes on the Appex scr
 
 ### Prerequisites
 
-- Xcode 15 or newer (tested with Xcode 26)
-- macOS 14.0 (Sonoma) or newer
+- Xcode 26 or newer
+- macOS 26.0 or newer
 - An Apple Developer Team ID if you want to distribute the screensaver to other machines
 
 ### Getting Started
@@ -34,27 +51,27 @@ See [BACKGROUND.md](BACKGROUND.md) for detailed technical notes on the Appex scr
 2. **Open the project in Xcode:**
 
    ```bash
-   open AppexSaverMinimal.xcodeproj
+   open WebGLScreenSaver.xcodeproj
    ```
 
-3. **Set your own Team ID:** open the project settings, select the `AppexSaverMinimal` target, and under **Signing & Capabilities** set your **Team**. Repeat for the `AppexSaverMinimalExtension` target. The project ships with `DEVELOPMENT_TEAM = ""` so you must add yours before signing kicks in.
+3. **Set your own Team ID:** open the project settings, select the `WebGLScreenSaver` target, and under **Signing & Capabilities** set your **Team**. Repeat for the `WebGLScreenSaverExtension` target. The project ships with `DEVELOPMENT_TEAM = ""` so you must add yours before signing kicks in.
 
 ### Project Targets
 
 This project contains two targets:
 
-- **AppexSaverMinimal** — A SwiftUI host application that bundles and registers the screensaver extension. Run this in Xcode (⌘R) to drive install / uninstall and preview from a normal app window.
-- **AppexSaverMinimalExtension** — The screensaver itself, packaged as an `.appex` and embedded inside the host app's `Contents/PlugIns/`.
+- **WebGLScreenSaver** — A SwiftUI host application that bundles and registers the screensaver extension. Run this in Xcode (⌘R) to drive install / uninstall and preview from a normal app window.
+- **WebGLScreenSaverExtension** — The screensaver itself, packaged as an `.appex` and embedded inside the host app's `Contents/PlugIns/`.
 
 ### Building
 
 ```bash
-xcodebuild -project AppexSaverMinimal.xcodeproj -scheme AppexSaverMinimal -configuration Debug build
+xcodebuild -project WebGLScreenSaver.xcodeproj -scheme AppexSaverMinimal -configuration Debug build
 ```
 
 ### Installing
 
-Most of the time you don't need to register the extension explicitly: macOS scans known locations (such as the Xcode build folder and `/Applications/`) and picks up new appex screensavers automatically shortly after they're built. After a build, opening **System Settings → Screen Saver** is usually enough — **AppexSaverMinimal** will be in the list.
+Most of the time you don't need to register the extension explicitly: macOS scans known locations (such as the Xcode build folder and `/Applications/`) and picks up new appex screensavers automatically shortly after they're built. After a build, opening **System Settings → Screen Saver** is usually enough — **WebGLScreenSaver** will be in the list.
 
 If it doesn't appear, you can nudge `pluginkit`:
 
@@ -62,10 +79,20 @@ If it doesn't appear, you can nudge `pluginkit`:
 2. **Manually with pluginkit:**
 
    ```bash
-   pluginkit -a ~/Library/Developer/Xcode/DerivedData/AppexSaverMinimal-*/Build/Products/Debug/AppexSaverMinimal.app/Contents/PlugIns/AppexSaverMinimalExtension.appex
+   pluginkit -a ~/Library/Developer/Xcode/DerivedData/WebGLScreenSaver-*/Build/Products/Debug/WebGLScreenSaver.app/Contents/PlugIns/WebGLScreenSaverExtension.appex
    ```
 
-Then pick **AppexSaverMinimal** in System Settings, or use the **Enable as Screensaver** button in the host app (powered by [PaperSaver](https://github.com/AerialScreensaver/PaperSaver) 0.2.0+).
+Then pick **WebGLScreenSaver** in System Settings, or use the **Enable as Screensaver** button in the host app (powered by [PaperSaver](https://github.com/AerialScreensaver/PaperSaver) 0.2.0+).
+
+While developing, restart `WallpaperAgent` after rebuilding or re-registering
+the `.appex` so macOS does not launch a cached extension UUID:
+
+```bash
+killall WallpaperAgent
+```
+
+The process restarts automatically. Running this briefly resets the desktop and
+wallpaper presentation, so do it immediately before the next screen saver test.
 
 #### Important: pick ONE location per machine
 
@@ -74,7 +101,7 @@ Then pick **AppexSaverMinimal** in System Settings, or use the **Enable as Scree
 Pick one location and stick with it on a given machine:
 
 - **Always use DerivedData** — develop in Xcode, never copy to `/Applications/`. Simplest while iterating.
-- **Always use `/Applications/`** — add a build phase or post-build script that copies `AppexSaverMinimal.app` into `/Applications/` (replacing any previous copy) before you trigger the screensaver. Closer to the user-install experience.
+- **Always use `/Applications/`** — add a build phase or post-build script that copies `WebGLScreenSaver.app` into `/Applications/` (replacing any previous copy) before you trigger the screensaver. Closer to the user-install experience.
 
 If you've already mixed both, remove the `/Applications/` copy and re-register the DerivedData one (or vice versa) to clear the cache. For full isolation between development and release-build testing, use a separate VM.
 
@@ -111,7 +138,7 @@ Both the host app and the extension log to a single subsystem so you can watch t
 2. Filter by subsystem:
 
    ```
-   subsystem:net.aerialscreensaver.AppexSaverMinimal
+   subsystem:kosei.haruyama.WebGLScreenSaver
    ```
 
 3. Trigger the screensaver:
@@ -125,34 +152,29 @@ Both the host app and the extension log to a single subsystem so you can watch t
 You can also stream logs from the command line:
 
 ```bash
-log stream --predicate 'subsystem == "net.aerialscreensaver.AppexSaverMinimal"' --level debug
+log stream --predicate 'subsystem == "kosei.haruyama.WebGLScreenSaver"' --level debug
 ```
 
 ## Project Structure
 
 ```
-AppexSaverMinimal/                            Host app
-├── AppexSaverMinimalApp.swift                @main SwiftUI app entry
-├── ContentView.swift                         Install / uninstall / activate UI
+WebGLScreenSaver/                             Host app and shared renderer
+├── WebGLScreenSaverApp.swift                 @main SwiftUI app entry
+├── WindowMainView.swift                      GLSL editor and extension controls
+├── CoreView.swift                            SwiftUI wrapper for the preview WKWebView
+├── ShaderRuntimeController.swift             WKWebView lifecycle and JS bridge
+├── ShaderSourceStore.swift                   Draft/apply persistence flow
+├── SharedSettings.swift                      App Group UserDefaults
 ├── PluginManager.swift                       pluginkit + PaperSaver wrappers
-├── PreviewView.swift                         NSView for the host's preview window
-├── PreviewViewRepresentable.swift            SwiftUI wrapper around PreviewView
-├── RainbowAnimator.swift                     Shared 6-color animation
-├── Helpers/
-│   └── Logger.swift                          Shared OSLog subsystem
-├── Info.plist
-└── AppexSaverMinimal.entitlements
+└── Resources/
+    ├── ShaderRuntime.html                    WebGL2 Shadertoy runtime
+    └── DefaultShader.glsl                    Bundled Seascape shader
 
-AppexSaverMinimalExtension/                   Screensaver appex
-├── AppexSaverMinimalExtension.swift          Principal class
-├── AppexSaverMinimalViewController.swift     ScreenSaverViewController
-├── AppexSaverMinimalView.swift               ScreenSaverView (uses RainbowAnimator)
-├── AppexSaverMinimalConfigurationViewController.swift   Configuration sheet
-├── PrivateHeaders/
-│   └── ScreenSaverPrivate.h                  Private API declarations (pre-public SDK)
-├── AppexSaverMinimalExtension-Bridging-Header.h
-├── Info.plist                                NSExtensionPrincipalClass etc.
-└── AppexSaverMinimalExtension.entitlements
+WebGLScreenSaverExtension/                    Screen saver appex
+├── WebGLScreenSaverExtension.swift           Principal class
+├── WebGLScreenSaverViewController.swift      ScreenSaverViewController
+├── WebGLScreenSaverView.swift                Direct WKWebView screen saver host
+└── WebGLScreenSaverConfigurationViewController.swift
 ```
 
 ## Comparison to the legacy `.saver` format
@@ -163,7 +185,7 @@ If you need to target older macOS versions that don't support Appex screensavers
 |---|---|---|
 | **Bundle type** | `XPC!` (ExtensionKit) | `BNDL` (NSBundle plug-in) |
 | **Process** | Separate sandboxed process | In-process with `legacyScreenSaver.appex` |
-| **Min macOS** | 14.0 (Sonoma) | All supported macOS |
+| **Min macOS** | 26.0 for this WebView-based project | All supported macOS |
 | **Distribution** | Embedded in a `.app` | Standalone `.saver` file |
 | **System Settings entry** | Listed alongside Apple's first-party savers | Listed under a separate "Other" group |
 

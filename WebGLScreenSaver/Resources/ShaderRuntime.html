@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style>
+        html, body, canvas {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<canvas id="shader-canvas"></canvas>
+<script>
+(() => {
+    "use strict";
+
+    const canvas = document.getElementById("shader-canvas");
+    let gl = null;
+    let vertexShader = null;
+    let vertexArray = null;
+    let program = null;
+    let uniforms = {};
+    let animationFrame = null;
+    let running = true;
+    let frameDriver = "raf";
+    let timeScale = 1.0;
+    let elapsed = 0.0;
+    let previousTimestamp = null;
+    let frame = 0;
+    let lastSource = null;
+    let mouse = [0.0, 0.0, -1.0, -1.0];
+    let mouseDown = false;
+    let contextError = null;
+
+    const vertexSource = `#version 300 es
+void main() {
+    vec2 position = vec2(
+        float((gl_VertexID << 1) & 2),
+        float(gl_VertexID & 2)
+    );
+    gl_Position = vec4(position * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+    function response(success, log = "", kind = "none") {
+        return JSON.stringify({ success, log, kind });
+    }
+
+    function unsupportedFeature(source) {
+        if (/\biChannel(?:Time|Resolution|[0-3])\b/.test(source)) {
+            return "iChannel inputs are not supported in version 1.";
+        }
+        if (/\bmain(?:Sound|VR|Cubemap)\s*\(/.test(source) || /\bsamplerCube\b/.test(source)) {
+            return "Sound, VR, and cubemap shaders are not supported in version 1.";
+        }
+        if (/^\s*#version\b/m.test(source)) {
+            return "Remove #version; the WebGL2 wrapper supplies it automatically.";
+        }
+        if (/\bvoid\s+main\s*\(/.test(source)) {
+            return "Paste a Shadertoy Image shader with mainImage(), not a GLSL main().";
+        }
+        return null;
+    }
+
+    function fragmentSource(source) {
+        return `#version 300 es
+precision highp float;
+precision highp int;
+
+uniform vec3 iResolution;
+uniform float iTime;
+uniform float iTimeDelta;
+uniform float iFrameRate;
+uniform int iFrame;
+uniform vec4 iMouse;
+uniform vec4 iDate;
+uniform float iSampleRate;
+
+out vec4 _shadertoyFragColor;
+
+#line 1
+${source}
+
+#line 100000
+void main() {
+    mainImage(_shadertoyFragColor, gl_FragCoord.xy);
+}`;
+    }
+
+    function compileShader(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            const log = gl.getShaderInfoLog(shader) || "Unknown shader compilation error.";
+            gl.deleteShader(shader);
+            return { shader: null, log };
+        }
+        return { shader, log: "" };
+    }
+
+    function initializeContext() {
+        gl = canvas.getContext("webgl2", {
+            alpha: false,
+            antialias: false,
+            depth: false,
+            stencil: false,
+            preserveDrawingBuffer: false,
+            powerPreference: "high-performance"
+        });
+
+        if (!gl) {
+            contextError = "WebGL2 is unavailable in this WebKit process.";
+            return false;
+        }
+
+        const vertexResult = compileShader(gl.VERTEX_SHADER, vertexSource);
+        if (!vertexResult.shader) {
+            contextError = vertexResult.log;
+            return false;
+        }
+
+        vertexShader = vertexResult.shader;
+        vertexArray = gl.createVertexArray();
+        gl.bindVertexArray(vertexArray);
+        contextError = null;
+        resize();
+        return true;
+    }
+
+    function cacheUniforms(nextProgram) {
+        const names = [
+            "iResolution", "iTime", "iTimeDelta", "iFrameRate",
+            "iFrame", "iMouse", "iDate", "iSampleRate"
+        ];
+        const result = {};
+        for (const name of names) {
+            result[name] = gl.getUniformLocation(nextProgram, name);
+        }
+        return result;
+    }
+
+    function compile(source) {
+        if (typeof source !== "string" || source.trim().length === 0) {
+            return response(false, "Shader source is empty.", "validation");
+        }
+
+        const unsupported = unsupportedFeature(source);
+        if (unsupported) {
+            return response(false, unsupported, "unsupported");
+        }
+
+        if (!gl && !initializeContext()) {
+            return response(false, contextError, "runtime");
+        }
+
+        const fragmentResult = compileShader(gl.FRAGMENT_SHADER, fragmentSource(source));
+        if (!fragmentResult.shader) {
+            return response(false, fragmentResult.log, "compile");
+        }
+
+        const nextProgram = gl.createProgram();
+        gl.attachShader(nextProgram, vertexShader);
+        gl.attachShader(nextProgram, fragmentResult.shader);
+        gl.linkProgram(nextProgram);
+        gl.deleteShader(fragmentResult.shader);
+
+        if (!gl.getProgramParameter(nextProgram, gl.LINK_STATUS)) {
+            const log = gl.getProgramInfoLog(nextProgram) || "Unknown shader link error.";
+            gl.deleteProgram(nextProgram);
+            return response(false, log, "link");
+        }
+
+        const previousProgram = program;
+        program = nextProgram;
+        uniforms = cacheUniforms(program);
+        lastSource = source;
+        elapsed = 0.0;
+        previousTimestamp = null;
+        frame = 0;
+
+        if (previousProgram) {
+            gl.deleteProgram(previousProgram);
+        }
+
+        ensureAnimationLoop();
+        return response(true, "Shader compiled successfully.", "none");
+    }
+
+    function resize() {
+        if (!gl) {
+            return;
+        }
+        const scale = window.devicePixelRatio || 1.0;
+        const width = Math.max(1, Math.round(canvas.clientWidth * scale));
+        const height = Math.max(1, Math.round(canvas.clientHeight * scale));
+        if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
+        }
+        gl.viewport(0, 0, width, height);
+    }
+
+    function setUniform(location, setter) {
+        if (location !== null && location !== undefined) {
+            setter(location);
+        }
+    }
+
+    function drawFrame(timestamp) {
+        if (!running) {
+            previousTimestamp = null;
+            return false;
+        }
+
+        resize();
+        if (!gl || !program) {
+            return false;
+        }
+
+        const realDelta = previousTimestamp === null
+            ? 0.0
+            : Math.min((timestamp - previousTimestamp) / 1000.0, 0.25);
+        previousTimestamp = timestamp;
+        const scaledDelta = realDelta * timeScale;
+        elapsed += scaledDelta;
+
+        gl.useProgram(program);
+        gl.bindVertexArray(vertexArray);
+        setUniform(uniforms.iResolution, location => gl.uniform3f(
+            location, canvas.width, canvas.height, 1.0
+        ));
+        setUniform(uniforms.iTime, location => gl.uniform1f(location, elapsed));
+        setUniform(uniforms.iTimeDelta, location => gl.uniform1f(location, scaledDelta));
+        setUniform(uniforms.iFrameRate, location => gl.uniform1f(
+            location, realDelta > 0.0 ? 1.0 / realDelta : 0.0
+        ));
+        setUniform(uniforms.iFrame, location => gl.uniform1i(location, frame));
+        setUniform(uniforms.iMouse, location => gl.uniform4f(
+            location, mouse[0], mouse[1], mouse[2], mouse[3]
+        ));
+
+        const date = new Date();
+        const seconds = date.getHours() * 3600.0
+            + date.getMinutes() * 60.0
+            + date.getSeconds()
+            + date.getMilliseconds() / 1000.0;
+        setUniform(uniforms.iDate, location => gl.uniform4f(
+            location,
+            date.getFullYear(),
+            date.getMonth() + 1,
+            date.getDate(),
+            seconds
+        ));
+        setUniform(uniforms.iSampleRate, location => gl.uniform1f(location, 44100.0));
+
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.flush();
+        frame += 1;
+        return true;
+    }
+
+    function renderAnimationFrame(timestamp) {
+        animationFrame = null;
+        drawFrame(timestamp);
+        ensureAnimationLoop();
+    }
+
+    function ensureAnimationLoop() {
+        if (running && frameDriver === "raf" && animationFrame === null) {
+            animationFrame = requestAnimationFrame(renderAnimationFrame);
+        }
+    }
+
+    function setFrameDriver(value) {
+        if (value !== "raf" && value !== "manual") {
+            return false;
+        }
+        frameDriver = value;
+        previousTimestamp = null;
+        if (animationFrame !== null) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+        }
+        ensureAnimationLoop();
+        return true;
+    }
+
+    function renderOneFrame() {
+        if (frameDriver !== "manual") {
+            return false;
+        }
+        return drawFrame(performance.now());
+    }
+
+    function setRunning(value) {
+        running = Boolean(value);
+        if (running) {
+            previousTimestamp = null;
+            ensureAnimationLoop();
+        } else if (animationFrame !== null) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+            previousTimestamp = null;
+        }
+        return true;
+    }
+
+    function setTimeScale(value) {
+        const numericValue = Number(value);
+        if (Number.isFinite(numericValue)) {
+            timeScale = numericValue;
+        }
+        return timeScale;
+    }
+
+    function diagnostics() {
+        resize();
+        return JSON.stringify({
+            canvasWidth: canvas.width,
+            canvasHeight: canvas.height,
+            devicePixelRatio: window.devicePixelRatio || 1.0,
+            frame,
+            running,
+            hasWebGL2: gl !== null,
+            hasProgram: program !== null,
+            documentVisibility: document.visibilityState,
+            frameDriver
+        });
+    }
+
+    function canvasPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * canvas.width / Math.max(rect.width, 1.0);
+        const y = (rect.bottom - event.clientY) * canvas.height / Math.max(rect.height, 1.0);
+        return [x, y];
+    }
+
+    canvas.addEventListener("pointerdown", event => {
+        const point = canvasPoint(event);
+        mouseDown = true;
+        mouse = [point[0], point[1], point[0], point[1]];
+        canvas.setPointerCapture(event.pointerId);
+    });
+
+    canvas.addEventListener("pointermove", event => {
+        const point = canvasPoint(event);
+        mouse[0] = point[0];
+        mouse[1] = point[1];
+    });
+
+    function releasePointer(event) {
+        const point = canvasPoint(event);
+        mouseDown = false;
+        mouse[0] = point[0];
+        mouse[1] = point[1];
+        mouse[2] = -Math.abs(mouse[2]);
+        mouse[3] = -Math.abs(mouse[3]);
+    }
+
+    canvas.addEventListener("pointerup", releasePointer);
+    canvas.addEventListener("pointercancel", releasePointer);
+    canvas.addEventListener("contextmenu", event => event.preventDefault());
+
+    canvas.addEventListener("webglcontextlost", event => {
+        event.preventDefault();
+        contextError = "The WebGL context was lost.";
+        gl = null;
+        program = null;
+        vertexShader = null;
+        vertexArray = null;
+        uniforms = {};
+    });
+
+    canvas.addEventListener("webglcontextrestored", () => {
+        if (initializeContext() && lastSource) {
+            compile(lastSource);
+        }
+    });
+
+    new ResizeObserver(resize).observe(canvas);
+    initializeContext();
+    ensureAnimationLoop();
+
+    window.shaderRuntime = {
+        compile,
+        setRunning,
+        setTimeScale,
+        setFrameDriver,
+        renderOneFrame,
+        diagnostics,
+        status() {
+            return response(contextError === null, contextError || "Ready.", contextError ? "runtime" : "none");
+        }
+    };
+})();
+</script>
+</body>
+</html>

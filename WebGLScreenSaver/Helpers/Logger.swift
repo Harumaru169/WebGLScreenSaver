@@ -13,4 +13,18 @@ enum AppexLog {
     static func logger(_ category: String) -> Logger {
         Logger(subsystem: subsystem, category: category)
     }
+
+    static let shaderRuntimeLogger = Self.logger("ShaderRuntime")
+
+    static let hostAppLogger = Self.logger("HostApp")
+
+    static let pluginManagerLogger = Self.logger("PluginManager")
+
+    static let extensionLogger = Self.logger("Extension")
+
+    static let viewControllerLogger = Self.logger("ViewController")
+
+    static let viewLogger = Self.logger("View")
+
+    static let configurationLogger = Self.logger("Configuration")
 }

@@ -1,46 +1,86 @@
 //  Main view controller for the screensaver. Specified as
 //  ScreenSaverViewControllerClass in Info.plist as
 //  `$(PRODUCT_MODULE_NAME).WebGLScreenSaverViewController`.
-//
-//  Mirrors Apple's Arabesque.appex pattern: only override the standard
-//  init(nibName:bundle:), init(coder:), and loadView(); let the framework
-//  drive everything else.
-//
 
 import AppKit
 import ScreenSaver
 
-private let logger = AppexLog.logger("ViewController")
-
 @objc(WebGLScreenSaverViewController)
 class WebGLScreenSaverViewController: ScreenSaverViewController {
+    private let logger = AppexLog.viewControllerLogger
+    
+    private let instanceID = String(UUID().uuidString.prefix(8))
 
-    /// Strong reference so the framework can't drop our view while we still own it.
+    /// Strong reference so the framework cannot drop the screen saver view.
     private var saverView: WebGLScreenSaverView?
 
     override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
-        logger.info("init(nibName:bundle:)")
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        logger.info("[VC:\(self.instanceID, privacy: .public)] init(nibName:bundle:)")
     }
 
     required init?(coder: NSCoder) {
-        logger.info("init(coder:)")
         super.init(coder: coder)
+        logger.info("[VC:\(self.instanceID, privacy: .public)] init(coder:)")
     }
 
     deinit {
-        logger.info("deinit")
+        logger.info("[VC:\(self.instanceID, privacy: .public)] deinit")
     }
 
-    /// Called by the framework to create the view.
+    /// Compatibility entry point for hosts that provide a display-specific
+    /// frame. WallpaperAgent currently uses the standard `loadView()` path.
+    override func loadView(forFrame frame: NSRect, isPreview: Bool) {
+        logger.info(
+            "[VC:\(self.instanceID, privacy: .public)] loadView(forFrame: \(frame.width, privacy: .public)x\(frame.height, privacy: .public), isPreview: \(isPreview, privacy: .public))"
+        )
+        installSaverView(frame: frame, isPreview: isPreview, trigger: "loadView(forFrame:isPreview:)")
+    }
+
+    /// WallpaperAgent does not resize a 1x1 service view after attachment, so a
+    /// useful initial frame is required even though the remote host may scale it.
     override func loadView() {
-        logger.info("loadView()")
+        let fallbackFrame = NSScreen.main?.frame
+            ?? NSRect(x: 0, y: 0, width: 1920, height: 1080)
+        let isPreview = fallbackFrame.width < 400
+        logger.warning(
+            "[VC:\(self.instanceID, privacy: .public)] loadView() fallback frame=\(fallbackFrame.width, privacy: .public)x\(fallbackFrame.height, privacy: .public) preview=\(isPreview, privacy: .public)"
+        )
+        installSaverView(
+            frame: fallbackFrame,
+            isPreview: isPreview,
+            trigger: "loadView() fallback"
+        )
+    }
 
-        let frame = NSScreen.main?.frame ?? NSRect(x: 0, y: 0, width: 1920, height: 1080)
-        let isPreview = frame.width < 400
+    private func installSaverView(
+        frame: NSRect,
+        isPreview: Bool,
+        trigger: String
+    ) {
+        if let saverView {
+            logger.warning(
+                "[VC:\(self.instanceID, privacy: .public)] ignored duplicate \(trigger, privacy: .public); view=\(saverView.instanceID, privacy: .public)"
+            )
+            return
+        }
 
-        let view = WebGLScreenSaverView(frame: frame, isPreview: isPreview)
-        saverView = view
-        self.view = view ?? NSView(frame: frame)
+        guard let saverView = WebGLScreenSaverView(
+            frame: frame,
+            isPreview: isPreview,
+            controllerInstanceID: instanceID
+        ) else {
+            logger.error(
+                "[VC:\(self.instanceID, privacy: .public)] failed to create ScreenSaverView from \(trigger, privacy: .public)"
+            )
+            self.view = NSView(frame: frame)
+            return
+        }
+
+        self.saverView = saverView
+        self.view = saverView
+        logger.info(
+            "[VC:\(self.instanceID, privacy: .public)] installed view=\(saverView.instanceID, privacy: .public) via \(trigger, privacy: .public)"
+        )
     }
 }

@@ -5,7 +5,7 @@
 import Foundation
 import PaperSaverKit
 
-private let logger = AppexLog.logger("PluginManager")
+private let logger = AppexLog.pluginManagerLogger
 
 @MainActor
 class PluginManager: ObservableObject {

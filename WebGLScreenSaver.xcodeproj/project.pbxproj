@@ -21,11 +21,15 @@
 		1A000067000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
 		735F141C303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
-		735F141D303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
-		735F141F303AA2220007EA17 /* DisplayLinkReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141E303AA2220007EA17 /* DisplayLinkReader.swift */; };
-		735F1420303AA2220007EA17 /* DisplayLinkReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141E303AA2220007EA17 /* DisplayLinkReader.swift */; };
 		7A000001000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
 		7A000002000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
+		8B000001000000000000000A /* ShaderRuntimeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B000011000000000000000B /* ShaderRuntimeController.swift */; };
+		8B000002000000000000000A /* ShaderRuntimeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B000011000000000000000B /* ShaderRuntimeController.swift */; };
+		8B000003000000000000000A /* ShaderSourceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B000012000000000000000B /* ShaderSourceStore.swift */; };
+		8B000005000000000000000A /* ShaderRuntime.html in Resources */ = {isa = PBXBuildFile; fileRef = 8B000013000000000000000B /* ShaderRuntime.html */; };
+		8B000006000000000000000A /* ShaderRuntime.html in Resources */ = {isa = PBXBuildFile; fileRef = 8B000013000000000000000B /* ShaderRuntime.html */; };
+		8B000007000000000000000A /* DefaultShader.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 8B000014000000000000000B /* DefaultShader.glsl */; };
+		8B000008000000000000000A /* DefaultShader.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 8B000014000000000000000B /* DefaultShader.glsl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,8 +78,11 @@
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		731972F0303ADE63001F9FE3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		735F141B303A0E550007EA17 /* CoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreView.swift; sourceTree = "<group>"; };
-		735F141E303AA2220007EA17 /* DisplayLinkReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayLinkReader.swift; sourceTree = "<group>"; };
 		7A000003000000000000000A /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
+		8B000011000000000000000B /* ShaderRuntimeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderRuntimeController.swift; sourceTree = "<group>"; };
+		8B000012000000000000000B /* ShaderSourceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSourceStore.swift; sourceTree = "<group>"; };
+		8B000013000000000000000B /* ShaderRuntime.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = ShaderRuntime.html; sourceTree = "<group>"; };
+		8B000014000000000000000B /* DefaultShader.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = DefaultShader.glsl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,11 +120,13 @@
 		1A000015000000000000000C /* WebGLScreenSaver */ = {
 			isa = PBXGroup;
 			children = (
+				8B000020000000000000000C /* Resources */,
 				1A000065000000000000000C /* Helpers */,
 				1A000001000000000000000B /* WebGLScreenSaverApp.swift */,
 				735F141B303A0E550007EA17 /* CoreView.swift */,
-				735F141E303AA2220007EA17 /* DisplayLinkReader.swift */,
 				7A000003000000000000000A /* SharedSettings.swift */,
+				8B000011000000000000000B /* ShaderRuntimeController.swift */,
+				8B000012000000000000000B /* ShaderSourceStore.swift */,
 				1A000002000000000000000B /* WindowMainView.swift */,
 				1A000032000000000000000B /* PluginManager.swift */,
 				1A00000A000000000000000B /* Info.plist */,
@@ -173,6 +182,15 @@
 				1A000064000000000000000B /* Logger.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		8B000020000000000000000C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8B000013000000000000000B /* ShaderRuntime.html */,
+				8B000014000000000000000B /* DefaultShader.glsl */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +283,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B000005000000000000000A /* ShaderRuntime.html in Resources */,
+				8B000007000000000000000A /* DefaultShader.glsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +293,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A000031000000000000000A /* Assets.xcassets in Resources */,
+				8B000006000000000000000A /* ShaderRuntime.html in Resources */,
+				8B000008000000000000000A /* DefaultShader.glsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,8 +349,9 @@
 				1A000032000000000000000A /* PluginManager.swift in Sources */,
 				735F141C303A0E550007EA17 /* CoreView.swift in Sources */,
 				1A000066000000000000000A /* Logger.swift in Sources */,
-				735F141F303AA2220007EA17 /* DisplayLinkReader.swift in Sources */,
 				7A000001000000000000000A /* SharedSettings.swift in Sources */,
+				8B000001000000000000000A /* ShaderRuntimeController.swift in Sources */,
+				8B000003000000000000000A /* ShaderSourceStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,10 +363,9 @@
 				1A000004000000000000000A /* WebGLScreenSaverViewController.swift in Sources */,
 				1A000005000000000000000A /* WebGLScreenSaverView.swift in Sources */,
 				1A000030000000000000000A /* WebGLScreenSaverConfigurationViewController.swift in Sources */,
-				735F1420303AA2220007EA17 /* DisplayLinkReader.swift in Sources */,
 				1A000067000000000000000A /* Logger.swift in Sources */,
-				735F141D303A0E550007EA17 /* CoreView.swift in Sources */,
 				7A000002000000000000000A /* SharedSettings.swift in Sources */,
+				8B000002000000000000000A /* ShaderRuntimeController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,7 +434,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -470,7 +492,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -543,7 +565,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = BVRR3L2WCF;
 				ENABLE_APP_SANDBOX = YES;
-				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
@@ -581,7 +603,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = BVRR3L2WCF;
 				ENABLE_APP_SANDBOX = YES;
-				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;

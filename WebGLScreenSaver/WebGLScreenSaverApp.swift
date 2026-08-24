@@ -11,9 +11,10 @@ struct WebGLScreenSaverApp: App {
         WindowGroup {
             WindowMainView()
         }
+        .defaultSize(width: 1_280, height: 800)
 
         Window("Preview", id: "preview") {
-            CoreView()
+            StandaloneShaderView()
                 .ignoresSafeArea()
         }
         .defaultSize(width: 640, height: 480)

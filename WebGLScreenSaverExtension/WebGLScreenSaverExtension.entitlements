@@ -8,6 +8,8 @@
 	<array>
 		<string>group.kosei.haruyama.WebGLScreenSaver</string>
 	</array>
+	<key>com.apple.security.network.client</key>
+	<true/>
 	<key>com.apple.security.cs.disable-library-validation</key>
 	<true/>
 	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>

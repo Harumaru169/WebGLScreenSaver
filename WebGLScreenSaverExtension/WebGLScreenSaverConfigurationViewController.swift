@@ -10,10 +10,9 @@
 
 import AppKit
 
-private let logger = AppexLog.logger("Configuration")
-
 @objc(WebGLScreenSaverConfigurationViewController)
 class WebGLScreenSaverConfigurationViewController: NSViewController {
+    private let logger = AppexLog.configurationLogger
 
     override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
         logger.info("init(nibName:bundle:)")
