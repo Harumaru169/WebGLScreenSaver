@@ -1,6 +1,5 @@
-//  ScreenSaverView hosting one WKWebView per display. ScreenSaver.framework's
-//  animation timer also provides a manual WebGL frame clock when the remote
-//  service window is considered hidden by WebKit.
+//  ScreenSaverView hosting one WKWebView per display. WebGL animation is driven
+//  by requestAnimationFrame inside the hosted page.
 
 import Cocoa
 import ScreenSaver
@@ -15,11 +14,7 @@ final class WebGLScreenSaverView: ScreenSaverView {
     private let controllerInstanceID: String
     private var runtimeController: ShaderRuntimeController?
     private var startupTask: Task<Void, Never>?
-    private var diagnosticsTask: Task<Void, Never>?
-    private var manualFrameTask: Task<Void, Never>?
     private var runtimeIdentity: UUID?
-    private var manualFrameDriving = false
-    private var manualRenderFailureCount = 0
     private var lastLoggedSize: NSSize?
 
     init?(
@@ -70,34 +65,6 @@ final class WebGLScreenSaverView: ScreenSaverView {
         if runtimeController == nil, window != nil {
             ensureRuntimeStarted(trigger: "animateOneFrame")
         }
-
-        guard manualFrameDriving,
-              manualFrameTask == nil,
-              let runtime = runtimeController,
-              let identity = runtimeIdentity else {
-            return
-        }
-
-        manualFrameTask = Task { @MainActor [weak self, runtime] in
-            let rendered = await runtime.renderOneFrame()
-            guard let self,
-                  self.runtimeController === runtime,
-                  self.runtimeIdentity == identity else {
-                return
-            }
-
-            self.manualFrameTask = nil
-            if rendered {
-                self.manualRenderFailureCount = 0
-            } else {
-                self.manualRenderFailureCount += 1
-                if self.manualRenderFailureCount == 1 {
-                    logger.error(
-                        "\(self.logPrefix, privacy: .public) manual frame render was rejected"
-                    )
-                }
-            }
-        }
     }
 
     override func viewDidMoveToWindow() {
@@ -109,7 +76,7 @@ final class WebGLScreenSaverView: ScreenSaverView {
             if window?.isVisible == true {
                 ensureRuntimeStarted(trigger: "viewDidMoveToWindow(visible)")
             } else {
-                logger.info(
+                self.logger.info(
                     "\(self.logPrefix, privacy: .public) waiting for animation callback; remote window is not visible"
                 )
             }
@@ -168,8 +135,6 @@ final class WebGLScreenSaverView: ScreenSaverView {
         addSubview(webView)
         runtimeController = runtime
         runtimeIdentity = identity
-        manualFrameDriving = false
-        manualRenderFailureCount = 0
 
         let source = SharedSettings.shaderActiveSource
         let timeScale = Double(SharedSettings.timeScale)
@@ -179,7 +144,7 @@ final class WebGLScreenSaverView: ScreenSaverView {
                   self.runtimeController === runtime,
                   self.runtimeIdentity == identity,
                   !Task.isCancelled else {
-                logger.info(
+                self?.logger.info(
                     "[View:\(self?.instanceID ?? "released", privacy: .public)] discarded stale compile result"
                 )
                 return
@@ -189,12 +154,11 @@ final class WebGLScreenSaverView: ScreenSaverView {
             if result.success {
                 await runtime.setTimeScale(timeScale)
                 await runtime.setRunning(true)
-                logger.info(
+                self.logger.info(
                     "\(self.logPrefix, privacy: .public) shader compile succeeded; rendering requested"
                 )
-                self.scheduleDiagnostics(for: runtime, identity: identity)
             } else {
-                logger.error(
+                self.logger.error(
                     "\(self.logPrefix, privacy: .public) shader failed kind=\(result.kind, privacy: .public) log=\(result.log, privacy: .public)"
                 )
             }
@@ -204,12 +168,6 @@ final class WebGLScreenSaverView: ScreenSaverView {
     func stopRuntime(trigger: String) {
         startupTask?.cancel()
         startupTask = nil
-        diagnosticsTask?.cancel()
-        diagnosticsTask = nil
-        manualFrameTask?.cancel()
-        manualFrameTask = nil
-        manualFrameDriving = false
-        manualRenderFailureCount = 0
         runtimeIdentity = nil
 
         guard let runtime = runtimeController else {
@@ -229,168 +187,9 @@ final class WebGLScreenSaverView: ScreenSaverView {
 
     deinit {
         startupTask?.cancel()
-        diagnosticsTask?.cancel()
-        manualFrameTask?.cancel()
         logger.info(
             "[VC:\(self.controllerInstanceID, privacy: .public) View:\(self.instanceID, privacy: .public)] deinit"
         )
-    }
-
-    private func scheduleDiagnostics(
-        for runtime: ShaderRuntimeController,
-        identity: UUID
-    ) {
-        diagnosticsTask?.cancel()
-        diagnosticsTask = Task { @MainActor [weak self, runtime] in
-            guard let self else {
-                return
-            }
-
-            let initial = await self.logDiagnostics(
-                stage: "post-compile",
-                runtime: runtime,
-                identity: identity
-            )
-
-            if let initial, initial.documentVisibility != "visible" {
-                let switched = await self.enableManualFrameDriving(
-                    reason: "document visibility is \(initial.documentVisibility)",
-                    runtime: runtime,
-                    identity: identity
-                )
-                if switched {
-                    await self.verifyManualFrameProgress(
-                        previousFrame: initial.frame,
-                        runtime: runtime,
-                        identity: identity
-                    )
-                }
-                self.diagnosticsTask = nil
-                return
-            }
-
-            do {
-                try await Task.sleep(for: .seconds(1))
-            } catch {
-                return
-            }
-
-            guard let later = await self.logDiagnostics(
-                stage: "after-1s",
-                runtime: runtime,
-                identity: identity
-            ) else {
-                return
-            }
-
-            if let initial, later.frame <= initial.frame {
-                let switched = await self.enableManualFrameDriving(
-                    reason: "requestAnimationFrame stalled at frame \(later.frame)",
-                    runtime: runtime,
-                    identity: identity
-                )
-                if switched {
-                    await self.verifyManualFrameProgress(
-                        previousFrame: later.frame,
-                        runtime: runtime,
-                        identity: identity
-                    )
-                }
-            } else if let initial {
-                logger.info(
-                    "\(self.logPrefix, privacy: .public) animation frame advanced: \(initial.frame, privacy: .public) -> \(later.frame, privacy: .public)"
-                )
-            }
-            self.diagnosticsTask = nil
-        }
-    }
-
-    private func enableManualFrameDriving(
-        reason: String,
-        runtime: ShaderRuntimeController,
-        identity: UUID
-    ) async -> Bool {
-        guard runtimeController === runtime,
-              runtimeIdentity == identity,
-              !Task.isCancelled else {
-            return false
-        }
-
-        logger.warning(
-            "\(self.logPrefix, privacy: .public) switching WebGL frame driver to manual: \(reason, privacy: .public)"
-        )
-        let accepted = await runtime.setFrameDriver(.manual)
-        guard accepted,
-              runtimeController === runtime,
-              runtimeIdentity == identity,
-              !Task.isCancelled else {
-            logger.error(
-                "\(self.logPrefix, privacy: .public) manual frame driver was not accepted"
-            )
-            return false
-        }
-
-        manualFrameDriving = true
-        manualRenderFailureCount = 0
-        return true
-    }
-
-    private func verifyManualFrameProgress(
-        previousFrame: Int,
-        runtime: ShaderRuntimeController,
-        identity: UUID
-    ) async {
-        do {
-            try await Task.sleep(for: .seconds(1))
-        } catch {
-            return
-        }
-
-        guard let diagnostics = await logDiagnostics(
-            stage: "manual-after-1s",
-            runtime: runtime,
-            identity: identity
-        ) else {
-            return
-        }
-
-        if diagnostics.frame > previousFrame {
-            logger.info(
-                "\(self.logPrefix, privacy: .public) manual frame advanced: \(previousFrame, privacy: .public) -> \(diagnostics.frame, privacy: .public)"
-            )
-        } else {
-            logger.error(
-                "\(self.logPrefix, privacy: .public) manual frame did not advance: \(previousFrame, privacy: .public) -> \(diagnostics.frame, privacy: .public)"
-            )
-        }
-    }
-
-    private func logDiagnostics(
-        stage: String,
-        runtime: ShaderRuntimeController,
-        identity: UUID
-    ) async -> ShaderRuntimeDiagnostics? {
-        guard runtimeController === runtime,
-              runtimeIdentity == identity,
-              !Task.isCancelled else {
-            return nil
-        }
-
-        do {
-            let diagnostics = try await runtime.diagnostics()
-            guard runtimeController === runtime, runtimeIdentity == identity else {
-                return nil
-            }
-            logger.info(
-                "\(self.logPrefix, privacy: .public) diagnostics[\(stage, privacy: .public)] canvas=\(diagnostics.canvasWidth, privacy: .public)x\(diagnostics.canvasHeight, privacy: .public) dpr=\(diagnostics.devicePixelRatio, privacy: .public) webgl2=\(diagnostics.hasWebGL2, privacy: .public) program=\(diagnostics.hasProgram, privacy: .public) running=\(diagnostics.running, privacy: .public) frame=\(diagnostics.frame, privacy: .public) visibility=\(diagnostics.documentVisibility, privacy: .public) driver=\(diagnostics.frameDriver.rawValue, privacy: .public)"
-            )
-            return diagnostics
-        } catch {
-            logger.error(
-                "\(self.logPrefix, privacy: .public) diagnostics[\(stage, privacy: .public)] failed: \(error.localizedDescription, privacy: .public)"
-            )
-            return nil
-        }
     }
 
     private var logPrefix: String {

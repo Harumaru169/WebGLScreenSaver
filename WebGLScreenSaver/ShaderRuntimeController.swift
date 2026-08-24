@@ -13,21 +13,11 @@ struct ShaderCompileResult: Equatable {
     }
 }
 
-enum ShaderFrameDriver: String, Codable {
-    case requestAnimationFrame = "raf"
-    case manual
-}
-
 struct ShaderRuntimeDiagnostics: Decodable, Equatable {
     let canvasWidth: Int
     let canvasHeight: Int
     let devicePixelRatio: Double
-    let frame: Int
-    let running: Bool
     let hasWebGL2: Bool
-    let hasProgram: Bool
-    let documentVisibility: String
-    let frameDriver: ShaderFrameDriver
 }
 
 enum ShaderRuntimeState: Equatable {
@@ -71,7 +61,6 @@ final class ShaderRuntimeController: NSObject {
     private var lastRenderableSource: String?
     private var desiredRunning = true
     private var desiredTimeScale = Double(SharedSettings.timeScale)
-    private var desiredFrameDriver = ShaderFrameDriver.requestAnimationFrame
 
     override convenience init() {
         self.init(diagnosticLabel: "host")
@@ -133,7 +122,6 @@ final class ShaderRuntimeController: NSObject {
             return result
         }
         await setTimeScale(desiredTimeScale)
-        await setFrameDriver(desiredFrameDriver)
         await setRunning(desiredRunning)
         return result
     }
@@ -174,60 +162,6 @@ final class ShaderRuntimeController: NSObject {
             state = .runtimeError(result.log)
             logger.error("[\(self.diagnosticLabel, privacy: .public)] Runtime call failed: \(result.log, privacy: .public)")
             return result
-        }
-    }
-
-    func diagnostics() async throws -> ShaderRuntimeDiagnostics {
-        try await prepare()
-        return try await callDiagnostics()
-    }
-
-    @discardableResult
-    func setFrameDriver(_ driver: ShaderFrameDriver) async -> Bool {
-        desiredFrameDriver = driver
-        guard isPrepared else {
-            return true
-        }
-
-        do {
-            let rawResult = try await webView.callAsyncJavaScript(
-                "return window.shaderRuntime.setFrameDriver(driver);",
-                arguments: ["driver": driver.rawValue],
-                in: nil,
-                contentWorld: .page
-            )
-            let accepted = rawResult as? Bool ?? false
-            if accepted {
-                logger.info(
-                    "[\(self.diagnosticLabel, privacy: .public)] frameDriver=\(driver.rawValue, privacy: .public)"
-                )
-            }
-            return accepted
-        } catch {
-            logger.error(
-                "[\(self.diagnosticLabel, privacy: .public)] Unable to update frame driver: \(error.localizedDescription, privacy: .public)"
-            )
-            return false
-        }
-    }
-
-    /// Draws one frame while the JavaScript runtime is in manual mode. The
-    /// caller serializes these IPC calls so a slow shader cannot build a queue.
-    func renderOneFrame() async -> Bool {
-        guard isPrepared, desiredRunning, desiredFrameDriver == .manual else {
-            return false
-        }
-
-        do {
-            let rawResult = try await webView.callAsyncJavaScript(
-                "return window.shaderRuntime.renderOneFrame();",
-                arguments: [:],
-                in: nil,
-                contentWorld: .page
-            )
-            return rawResult as? Bool ?? false
-        } catch {
-            return false
         }
     }
 
@@ -405,7 +339,6 @@ final class ShaderRuntimeController: NSObject {
 
             lastRenderableSource = source
             await setTimeScale(desiredTimeScale)
-            await setFrameDriver(desiredFrameDriver)
             await setRunning(desiredRunning)
         } catch {
             state = .runtimeError(error.localizedDescription)

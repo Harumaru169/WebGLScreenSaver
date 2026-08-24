@@ -31,7 +31,6 @@
     let uniforms = {};
     let animationFrame = null;
     let running = true;
-    let frameDriver = "raf";
     let timeScale = 1.0;
     let elapsed = 0.0;
     let previousTimestamp = null;
@@ -275,30 +274,9 @@ void main() {
     }
 
     function ensureAnimationLoop() {
-        if (running && frameDriver === "raf" && animationFrame === null) {
+        if (running && animationFrame === null) {
             animationFrame = requestAnimationFrame(renderAnimationFrame);
         }
-    }
-
-    function setFrameDriver(value) {
-        if (value !== "raf" && value !== "manual") {
-            return false;
-        }
-        frameDriver = value;
-        previousTimestamp = null;
-        if (animationFrame !== null) {
-            cancelAnimationFrame(animationFrame);
-            animationFrame = null;
-        }
-        ensureAnimationLoop();
-        return true;
-    }
-
-    function renderOneFrame() {
-        if (frameDriver !== "manual") {
-            return false;
-        }
-        return drawFrame(performance.now());
     }
 
     function setRunning(value) {
@@ -328,12 +306,7 @@ void main() {
             canvasWidth: canvas.width,
             canvasHeight: canvas.height,
             devicePixelRatio: window.devicePixelRatio || 1.0,
-            frame,
-            running,
-            hasWebGL2: gl !== null,
-            hasProgram: program !== null,
-            documentVisibility: document.visibilityState,
-            frameDriver
+            hasWebGL2: gl !== null
         });
     }
 
@@ -394,8 +367,6 @@ void main() {
         compile,
         setRunning,
         setTimeScale,
-        setFrameDriver,
-        renderOneFrame,
         diagnostics,
         status() {
             return response(contextError === null, contextError || "Ready.", contextError ? "runtime" : "none");

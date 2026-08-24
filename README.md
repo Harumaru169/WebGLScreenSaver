@@ -16,18 +16,17 @@ Use this as a starting point for your own Appex screensaver. The companion proje
 
 The extension creates one `WKWebView` per display from ScreenSaver.framework's
 animation lifecycle. It uses `startAnimation()` as the primary startup signal
-and keeps the framework's 30 fps animation timer enabled so `animateOneFrame()`
+and keeps the framework's animation timer enabled so `animateOneFrame()`
 can start displays that miss that callback. A visibly attached AppKit window is
 also accepted as a startup signal for previews.
 
-The shader normally uses `requestAnimationFrame`. Remote screen-saver windows
-can be reported as hidden to WebKit even while their pixels are on screen, so
-the extension detects a hidden or stalled page and switches only that display
-to explicit WebGL draws from `animateOneFrame()`. It also disables WebKit
-window-occlusion detection for the screen saver view hierarchy. That selector
-is private and therefore needs review before Mac App Store distribution. The
-runtime is torn down on `stopAnimation()` or window detachment, and navigation
-outside the bundled runtime remains blocked by the navigation delegate.
+The shader uses `requestAnimationFrame`. Remote screen-saver windows can be
+reported as hidden to WebKit even while their pixels are on screen, so the
+extension disables WebKit window-occlusion detection for the screen saver view
+hierarchy. That selector is private and therefore needs review before Mac App
+Store distribution. The runtime is torn down on `stopAnimation()` or window
+detachment, and navigation outside the bundled runtime remains blocked by the
+navigation delegate.
 
 See [BACKGROUND.md](BACKGROUND.md) for detailed technical notes on the Appex screensaver architecture.
 
