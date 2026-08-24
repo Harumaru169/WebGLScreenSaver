@@ -6,9 +6,9 @@ private let logger = AppexLog.hostAppLogger
 @MainActor
 struct WindowMainView: View {
     @Environment(\.openWindow) private var openWindow
-    @StateObject private var pluginManager = PluginManager()
-    @StateObject private var sourceStore = ShaderSourceStore()
-    @StateObject private var shaderRuntime = ShaderRuntimeController()
+    @State private var pluginManager = PluginManager()
+    @State private var sourceStore = ShaderSourceStore()
+    @State private var shaderRuntime = ShaderRuntimeController()
 
     @State private var statusMessage = "Ready"
     @State private var shaderMessage = "Showing the applied shader."
@@ -25,9 +25,10 @@ struct WindowMainView: View {
             HSplitView {
                 shaderEditor
                     .frame(minWidth: 440, idealWidth: 560)
-
+                    .padding(.trailing, 5)
                 previewPanel
                     .frame(minWidth: 480, idealWidth: 680)
+                    .padding(.leading, 5)
             }
 
             Text(statusMessage)
@@ -48,19 +49,17 @@ struct WindowMainView: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            Image(systemName: "sparkles.tv")
+            Image(systemName: "sparkles.tv.fill")
                 .font(.system(size: 32))
                 .foregroundStyle(.tint)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("WebGL ScreenSaver")
                     .font(.title.bold())
-                Text("Shadertoy Image shader editor")
+                Text("Compatible with Shadertoy shader code")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
-            Spacer()
 
             statusBadge(
                 title: pluginManager.isInstalled ? "Installed" : "Not Installed",
@@ -70,6 +69,7 @@ struct WindowMainView: View {
                 title: pluginManager.isActiveScreensaver ? "Active" : "Not Active",
                 color: pluginManager.isActiveScreensaver ? .green : .gray
             )
+            Spacer()
         }
     }
 
@@ -143,7 +143,7 @@ struct WindowMainView: View {
             }
             .padding(4)
         } label: {
-            Text("Screen Saver Extension")
+            Text("Screen Saver Extension").font(.headline)
         }
     }
 
@@ -223,7 +223,7 @@ struct WindowMainView: View {
             }
             .padding(4)
         } label: {
-            Text("GLSL Source")
+            Text("GLSL Source").font(.headline)
         }
     }
 
@@ -258,7 +258,7 @@ struct WindowMainView: View {
             .padding(4)
         } label: {
             HStack {
-                Text("Applied Shader Preview")
+                Text("Applied Shader Preview").font(.headline)
                 Spacer()
                 runtimeStateLabel
             }

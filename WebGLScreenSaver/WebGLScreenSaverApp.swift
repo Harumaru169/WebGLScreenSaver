@@ -8,7 +8,7 @@ import SwiftUI
 @main
 struct WebGLScreenSaverApp: App {
     var body: some Scene {
-        WindowGroup {
+        Window("WebGLScreenSaver", id: "main") {
             WindowMainView()
         }
         .defaultSize(width: 1_280, height: 800)

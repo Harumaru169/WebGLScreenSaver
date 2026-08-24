@@ -1,5 +1,5 @@
-import Combine
 import Foundation
+import Observation
 import os
 import WebKit
 
@@ -54,12 +54,12 @@ private struct ShaderRuntimeResponse: Decodable {
     let kind: String
 }
 
-@MainActor
-final class ShaderRuntimeController: NSObject, ObservableObject {
+@MainActor @Observable
+final class ShaderRuntimeController: NSObject {
     let webView: WKWebView
 
-    @Published private(set) var state: ShaderRuntimeState = .idle
-    @Published private(set) var lastCompileResult: ShaderCompileResult?
+    private(set) var state: ShaderRuntimeState = .idle
+    private(set) var lastCompileResult: ShaderCompileResult?
 
     private let logger = AppexLog.shaderRuntimeLogger
     private let diagnosticLabel: String

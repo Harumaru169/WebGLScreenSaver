@@ -1,10 +1,10 @@
-import Combine
 import Foundation
+import Observation
 
-@MainActor
-final class ShaderSourceStore: ObservableObject {
-    @Published var draftSource: String
-    @Published private(set) var activeSource: String
+@MainActor @Observable
+final class ShaderSourceStore {
+    var draftSource: String
+    private(set) var activeSource: String
 
     var hasUnappliedChanges: Bool {
         draftSource != activeSource

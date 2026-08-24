@@ -2,7 +2,7 @@ import SwiftUI
 import WebKit
 
 struct CoreView: View {
-    @ObservedObject var runtime: ShaderRuntimeController
+    let runtime: ShaderRuntimeController
 
     let shaderSource: String
     var showsDiagnostics = true
@@ -62,7 +62,7 @@ private struct ShaderWebView: NSViewRepresentable {
 }
 
 struct StandaloneShaderView: View {
-    @StateObject private var runtime = ShaderRuntimeController()
+    @State private var runtime = ShaderRuntimeController()
 
     var body: some View {
         CoreView(

@@ -21,6 +21,7 @@
 		1A000067000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
 		735F141C303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
+		73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73E72CA1303BF71E0061A657 /* Assets.xcassets */; };
 		7A000001000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
 		7A000002000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
 		8B000001000000000000000A /* ShaderRuntimeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B000011000000000000000B /* ShaderRuntimeController.swift */; };
@@ -78,6 +79,7 @@
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		731972F0303ADE63001F9FE3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		735F141B303A0E550007EA17 /* CoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreView.swift; sourceTree = "<group>"; };
+		73E72CA1303BF71E0061A657 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7A000003000000000000000A /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		8B000011000000000000000B /* ShaderRuntimeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderRuntimeController.swift; sourceTree = "<group>"; };
 		8B000012000000000000000B /* ShaderSourceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSourceStore.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				8B000012000000000000000B /* ShaderSourceStore.swift */,
 				1A000002000000000000000B /* WindowMainView.swift */,
 				1A000032000000000000000B /* PluginManager.swift */,
+				73E72CA1303BF71E0061A657 /* Assets.xcassets */,
 				1A00000A000000000000000B /* Info.plist */,
 				1A00000B000000000000000B /* WebGLScreenSaver.entitlements */,
 			);
@@ -284,6 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B000005000000000000000A /* ShaderRuntime.html in Resources */,
+				73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */,
 				8B000007000000000000000A /* DefaultShader.glsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

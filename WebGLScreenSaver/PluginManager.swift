@@ -3,21 +3,22 @@
 //
 
 import Foundation
+import Observation
 import PaperSaverKit
 
 private let logger = AppexLog.pluginManagerLogger
 
-@MainActor
-class PluginManager: ObservableObject {
-    @Published var isInstalled: Bool = false
-    @Published var installedVersion: String?
-    @Published var installedPath: String?
-    @Published var isLoading: Bool = false
-    @Published var lastError: String?
+@MainActor @Observable
+final class PluginManager {
+    var isInstalled: Bool = false
+    var installedVersion: String?
+    var installedPath: String?
+    var isLoading: Bool = false
+    var lastError: String?
 
-    @Published var isActiveScreensaver: Bool = false
-    @Published var isCheckingScreensaver: Bool = false
-    @Published var screensaverError: String?
+    var isActiveScreensaver: Bool = false
+    var isCheckingScreensaver: Bool = false
+    var screensaverError: String?
 
     private let bundleIdentifier = "kosei.haruyama.WebGLScreenSaver.Extension"
     private let paperSaver = PaperSaver()

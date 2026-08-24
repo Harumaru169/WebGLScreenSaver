@@ -37,7 +37,7 @@ final class WebGLScreenSaverView: ScreenSaverView {
         wantsLayer = true
         layer?.backgroundColor = NSColor.black.cgColor
         autoresizesSubviews = true
-        animationTimeInterval = 1.0 / 30.0
+        animationTimeInterval = 1.0 / 60.0 // screen saverのfpsを決める
     }
 
     override convenience init?(frame: NSRect, isPreview: Bool) {
