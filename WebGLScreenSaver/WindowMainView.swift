@@ -178,7 +178,7 @@ struct WindowMainView: View {
                     }
                     .disabled(isApplying || !sourceStore.hasUnappliedChanges)
 
-                    Button("Reset to Seascape") {
+                    Button("Reset to default") {
                         sourceStore.resetDraftToDefault()
                         shaderMessage = "Default shader loaded into the draft. Apply to activate it."
                         shaderLog = ""
