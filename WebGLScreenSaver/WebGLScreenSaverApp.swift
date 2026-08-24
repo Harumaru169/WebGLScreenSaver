@@ -7,12 +7,23 @@ import SwiftUI
 
 @main
 struct WebGLScreenSaverApp: App {
+    @Environment(\.openWindow) private var openWindow
+
     var body: some Scene {
         Window("WebGL Screen Saver", id: "main") {
             WindowMainView()
                 .presentedWindowToolbarStyle(.unified)
         }
         .defaultSize(width: 1_280, height: 800)
+        .commands {
+            CommandGroup(replacing: CommandGroupPlacement.appInfo) {
+                Button {
+                    openWindow(id: "about")
+                } label: {
+                    Text("About WebGL Screen Saver")
+                }
+            }
+        }
 
         Window("Preview", id: "preview") {
             StandaloneShaderView()
@@ -22,5 +33,15 @@ struct WebGLScreenSaverApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 640, height: 480)
 
+        Window("About WebGL Screen Saver", id: "about") {
+            AboutView()
+                .toolbar(removing: .title)
+                .toolbarBackground(.hidden, for: .windowToolbar)
+                .containerBackground(.regularMaterial, for: .window)
+                .windowMinimizeBehavior(.disabled)
+        }
+        .windowBackgroundDragBehavior(.enabled)
+        .windowResizability(.contentSize)
+        .restorationBehavior(.disabled)
     }
 }

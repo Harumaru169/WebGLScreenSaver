@@ -19,7 +19,6 @@ struct WindowMainView: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            header
             extensionControls
 
             HSplitView {

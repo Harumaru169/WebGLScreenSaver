@@ -22,6 +22,7 @@
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
 		735F141C303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
 		73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73E72CA1303BF71E0061A657 /* Assets.xcassets */; };
+		73E72CBA303C18440061A657 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E72CB9303C18440061A657 /* AboutView.swift */; };
 		7A000001000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
 		7A000002000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
 		8B000001000000000000000A /* ShaderRuntimeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B000011000000000000000B /* ShaderRuntimeController.swift */; };
@@ -80,6 +81,7 @@
 		731972F0303ADE63001F9FE3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		735F141B303A0E550007EA17 /* CoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreView.swift; sourceTree = "<group>"; };
 		73E72CA1303BF71E0061A657 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		73E72CB9303C18440061A657 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		7A000003000000000000000A /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
 		8B000011000000000000000B /* ShaderRuntimeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderRuntimeController.swift; sourceTree = "<group>"; };
 		8B000012000000000000000B /* ShaderSourceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShaderSourceStore.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				7A000003000000000000000A /* SharedSettings.swift */,
 				8B000011000000000000000B /* ShaderRuntimeController.swift */,
 				8B000012000000000000000B /* ShaderSourceStore.swift */,
+				73E72CB9303C18440061A657 /* AboutView.swift */,
 				1A000002000000000000000B /* WindowMainView.swift */,
 				1A000032000000000000000B /* PluginManager.swift */,
 				73E72CA1303BF71E0061A657 /* Assets.xcassets */,
@@ -352,6 +355,7 @@
 				1A000002000000000000000A /* WindowMainView.swift in Sources */,
 				1A000032000000000000000A /* PluginManager.swift in Sources */,
 				735F141C303A0E550007EA17 /* CoreView.swift in Sources */,
+				73E72CBA303C18440061A657 /* AboutView.swift in Sources */,
 				1A000066000000000000000A /* Logger.swift in Sources */,
 				7A000001000000000000000A /* SharedSettings.swift in Sources */,
 				8B000001000000000000000A /* ShaderRuntimeController.swift in Sources */,
