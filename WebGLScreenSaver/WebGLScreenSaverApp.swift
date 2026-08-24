@@ -8,15 +8,19 @@ import SwiftUI
 @main
 struct WebGLScreenSaverApp: App {
     var body: some Scene {
-        Window("WebGLScreenSaver", id: "main") {
+        Window("WebGL Screen Saver", id: "main") {
             WindowMainView()
+                .presentedWindowToolbarStyle(.unified)
         }
         .defaultSize(width: 1_280, height: 800)
 
         Window("Preview", id: "preview") {
             StandaloneShaderView()
                 .ignoresSafeArea()
+                .presentedWindowToolbarStyle(.unified)
         }
+        .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 640, height: 480)
+
     }
 }

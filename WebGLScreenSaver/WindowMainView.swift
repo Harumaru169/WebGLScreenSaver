@@ -30,11 +30,6 @@ struct WindowMainView: View {
                     .frame(minWidth: 480, idealWidth: 680)
                     .padding(.leading, 5)
             }
-
-            Text(statusMessage)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(16)
         .frame(minWidth: 1_000, minHeight: 680)
@@ -56,19 +51,9 @@ struct WindowMainView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("WebGL ScreenSaver")
                     .font(.title.bold())
-                Text("Compatible with Shadertoy shader code")
+                Text("Compatible with [Shadertoy](https://www.shadertoy.com/)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
             }
-
-            statusBadge(
-                title: pluginManager.isInstalled ? "Installed" : "Not Installed",
-                color: pluginManager.isInstalled ? .green : .gray
-            )
-            statusBadge(
-                title: pluginManager.isActiveScreensaver ? "Active" : "Not Active",
-                color: pluginManager.isActiveScreensaver ? .green : .gray
-            )
             Spacer()
         }
     }
@@ -99,13 +84,19 @@ struct WindowMainView: View {
                             || pluginManager.isCheckingScreensaver
                     )
 
-                    Button("Open Preview") {
-                        openWindow(id: "preview")
-                    }
+                    statusBadge(
+                        title: pluginManager.isInstalled ? "Installed" : "Not Installed",
+                        color: pluginManager.isInstalled ? .green : .gray
+                    )
+                    statusBadge(
+                        title: pluginManager.isActiveScreensaver ? "Active" : "Not Active",
+                        color: pluginManager.isActiveScreensaver ? .green : .gray
+                    )
 
-                    Button("Open Screen Saver Settings") {
-                        openScreenSaverSettings()
-                    }
+                    Text(statusMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     Spacer()
 
@@ -223,22 +214,35 @@ struct WindowMainView: View {
             }
             .padding(4)
         } label: {
-            Text("GLSL Source").font(.headline)
+            HStack {
+                Text("GLSL Source").font(.headline)
+                Text("Compatible with [Shadertoy](https://www.shadertoy.com/)")
+                    .font(.caption)
+            }
         }
     }
 
     private var previewPanel: some View {
-        GroupBox {
-            VStack(spacing: 10) {
+        VStack(spacing: 10) {
+            HStack {
+                Text("Applied Shader Preview").font(.headline)
+
+                Spacer()
+                runtimeStateLabel
+            }
                 CoreView(
                     runtime: shaderRuntime,
                     shaderSource: sourceStore.activeSource,
                     showsDiagnostics: true
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(.separator, lineWidth: 1)
+                .overlay(alignment: .bottomTrailing) {
+                    Button {
+                        openWindow(id: "preview")
+                    } label: {
+                        Label("Open in Preview Window", systemImage: "macwindow.on.rectangle")
+                    }
+                    .buttonStyle(.glass)
+                    .padding(5)
                 }
 
                 HStack(spacing: 10) {
@@ -254,15 +258,7 @@ struct WindowMainView: View {
                         await shaderRuntime.setTimeScale(Double(newValue))
                     }
                 }
-            }
-            .padding(4)
-        } label: {
-            HStack {
-                Text("Applied Shader Preview").font(.headline)
-                Spacer()
-                runtimeStateLabel
-            }
-        }
+        }.padding(4)
     }
 
     private var runtimeStateLabel: some View {
