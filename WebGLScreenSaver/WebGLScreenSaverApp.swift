@@ -37,7 +37,7 @@ struct WebGLScreenSaverApp: App {
             AboutView()
                 .toolbar(removing: .title)
                 .toolbarBackground(.hidden, for: .windowToolbar)
-                .containerBackground(.regularMaterial, for: .window)
+                .containerBackground(.ultraThickMaterial, for: .window)
                 .windowMinimizeBehavior(.disabled)
         }
         .windowBackgroundDragBehavior(.enabled)

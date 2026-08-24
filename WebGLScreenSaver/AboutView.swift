@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AboutView: View {
+    @Environment(\.openURL) var openURL
+
     private var appVersionAndBuild: String {
         let version = Bundle.main
             .infoDictionary?["CFBundleShortVersionString"] as? String ?? "N/A"
@@ -19,6 +21,10 @@ struct AboutView: View {
         URL(string: "https://github.com/Harumaru169")!
     }
 
+    private var creditsURL: URL? {
+        Bundle.main.url(forResource: "Credits", withExtension: "html")!
+    }
+
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: "sparkles.tv.fill")
@@ -33,10 +39,17 @@ struct AboutView: View {
                 Text(copyright)
             }
             .font(.callout)
-            Link(
-                "Developer Website",
-                destination: developerWebsite
-            )
+            HStack(spacing: 12) {
+                Button("Developer Website") {
+                    NSWorkspace.shared.open(developerWebsite)
+                }
+                if let creditsURL {
+                    Button("Acknowledgements") {
+                        NSWorkspace.shared.open(creditsURL)
+                    }
+                }
+            }
+            .buttonStyle(.link)
             .foregroundStyle(.accent)
         }
         .padding()
