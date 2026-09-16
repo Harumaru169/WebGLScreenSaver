@@ -1,5 +1,16 @@
 import SwiftUI
 
+fileprivate struct AppIconView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Image(nsImage: NSApplication.shared.applicationIconImage)
+            .resizable()
+            .scaledToFit()
+            .id(colorScheme)
+    }
+}
+
 struct AboutView: View {
     @Environment(\.openURL) var openURL
 
@@ -26,14 +37,11 @@ struct AboutView: View {
     }
 
     var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "sparkles.tv.fill")
-                .resizable()
-                .foregroundStyle(.tint)
-                .scaledToFit()
-                .frame(width: 80)
+        VStack(spacing: 10) {
+            AppIconView()
+                .frame(width: 150)
             Text("WebGL Screen Saver")
-                .font(.title)
+                .font(.largeTitle.bold())
             VStack(spacing: 6) {
                 Text(appVersionAndBuild)
                 Text(copyright)

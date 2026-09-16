@@ -13,7 +13,7 @@ final class PluginManager {
     var isInstalled: Bool = false
     var installedVersion: String?
     var installedPath: String?
-    var isLoading: Bool = false
+    var isLoading: Bool = false // true between the installed state and uninstalled state
     var lastError: String?
 
     var isActiveScreensaver: Bool = false
