@@ -1,0 +1,132 @@
+{
+  "fill" : {
+    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+  },
+  "groups" : [
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "extended-gray:1.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
+          "image-name" : "eyes.png",
+          "name" : "eyes",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -76.48942308872893,
+              -71.41944829565364
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "extended-gray:1.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
+          "hidden" : false,
+          "image-name" : "hexagon.png",
+          "name" : "hexagon"
+        }
+      ],
+      "lighting" : "individual",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "blur-material" : 0.5,
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "gray:0.25000,0.50000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "gray:1.00000,0.15121"
+              }
+            }
+          ],
+          "image-name" : "hexagon.svg",
+          "name" : "hexagon"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "gray:0.21000,1.00000",
+                  "gray:0.08000,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.5,
+                    "y" : 0
+                  },
+                  "stop" : {
+                    "x" : 0.5,
+                    "y" : 0.7
+                  }
+                }
+              }
+            }
+          ],
+          "image-name" : "slice1.png",
+          "name" : "slice1"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

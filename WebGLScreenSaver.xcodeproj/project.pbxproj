@@ -20,6 +20,7 @@
 		1A000066000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000067000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
+		734603B8305AEAE8003BFCB4 /* app-icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 734603B7305AEAE8003BFCB4 /* app-icon.icon */; };
 		735F141C303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
 		73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73E72CA1303BF71E0061A657 /* Assets.xcassets */; };
 		73E72CBA303C18440061A657 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E72CB9303C18440061A657 /* AboutView.swift */; };
@@ -77,9 +78,9 @@
 		1A000030000000000000000B /* WebGLScreenSaverConfigurationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebGLScreenSaverConfigurationViewController.swift; sourceTree = "<group>"; };
 		1A000031000000000000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A000032000000000000000B /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
-		1A000050000000000000000B /* BuildNumber.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = BuildNumber.xcconfig; sourceTree = "<group>"; };
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		731972F0303ADE63001F9FE3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		734603B7305AEAE8003BFCB4 /* app-icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = "app-icon.icon"; sourceTree = "<group>"; };
 		735F141B303A0E550007EA17 /* CoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreView.swift; sourceTree = "<group>"; };
 		73E72CA1303BF71E0061A657 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		73E72CB9303C18440061A657 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -114,7 +115,6 @@
 		1A000014000000000000000C = {
 			isa = PBXGroup;
 			children = (
-				1A000050000000000000000B /* BuildNumber.xcconfig */,
 				731972F0303ADE63001F9FE3 /* .swiftlint.yml */,
 				1A000015000000000000000C /* WebGLScreenSaver */,
 				1A000016000000000000000C /* WebGLScreenSaverExtension */,
@@ -137,6 +137,7 @@
 				1A000002000000000000000B /* WindowMainView.swift */,
 				1A000032000000000000000B /* PluginManager.swift */,
 				73E72CA1303BF71E0061A657 /* Assets.xcassets */,
+				734603B7305AEAE8003BFCB4 /* app-icon.icon */,
 				1A00000A000000000000000B /* Info.plist */,
 				1A00000B000000000000000B /* WebGLScreenSaver.entitlements */,
 			);
@@ -294,6 +295,7 @@
 			files = (
 				8B000005000000000000000A /* ShaderRuntime.html in Resources */,
 				73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */,
+				734603B8305AEAE8003BFCB4 /* app-icon.icon in Resources */,
 				8B000007000000000000000A /* DefaultShader.glsl in Resources */,
 				8B000009000000000000000A /* Credits.html in Resources */,
 			);
@@ -394,7 +396,6 @@
 /* Begin XCBuildConfiguration section */
 		1A000023000000000000000A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1A000050000000000000000B /* BuildNumber.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -458,7 +459,6 @@
 		};
 		1A000024000000000000000A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1A000050000000000000000B /* BuildNumber.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -515,7 +515,7 @@
 		1A000025000000000000000A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "app-icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WebGLScreenSaver/WebGLScreenSaver.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -544,7 +544,7 @@
 		1A000026000000000000000A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "app-icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WebGLScreenSaver/WebGLScreenSaver.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
