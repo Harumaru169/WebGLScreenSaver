@@ -34,7 +34,7 @@ See [BACKGROUND.md](BACKGROUND.md) for detailed technical notes on the Appex scr
 
 ### Prerequisites
 
-- Xcode 26 or newer
+- Xcode 27 or newer
 - macOS 26.0 or newer
 - An Apple Developer Team ID for Developer ID distribution; the experimental CI builds need no certificate
 
@@ -118,7 +118,12 @@ or that App Group settings are shared correctly; test both on a clean Mac.
 - `.github/workflows/ci.yml` builds branches, pull requests, and manual runs.
 - `.github/workflows/release.yml` builds tags of the form `vX.Y.Z` and creates
   an experimental **Draft Release** in `Harumaru169/WebGLScreenSaver`.
-- Both use the `macos-26` arm64 runner with Xcode 26.6 explicitly selected.
+- Both use the `xcode-27` arm64 preview runner with Xcode 27.0 explicitly selected.
+  The current Icon Composer asset builds with Xcode 27; Xcode 26.6 crashes
+  while compiling it. Workflows report and verify the selected toolchain.
+  The app deployment target remains macOS 26.0.
+  GitHub currently provides this runner as a public preview, so queueing or
+  image availability may vary.
 - Neither uses development credentials. CI skips automatic extension
   registration, SwiftLint auto-fixes, and the scheme's timestamp build number.
 - Dependencies are pinned by `Package.resolved`. The release version comes
@@ -139,7 +144,7 @@ for example `v1.0.0`. Every subsequent distributed build needs a new version/tag
 
 #### Local build
 
-With Xcode 26 or newer selected:
+With Xcode 27 or newer selected:
 
 ```bash
 bash scripts/build-release.sh 1.0.0

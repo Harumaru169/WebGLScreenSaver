@@ -15,14 +15,26 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 30
     env:
-      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_27.0.0.app/Contents/Developer
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Report and verify build environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          sw_vers
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+          selected_version=$(xcodebuild -version | awk '/^Xcode / { print $2 }')
+          [[ "$selected_version" == 27.0 ]] || {
+            echo 'Expected Xcode 27.0 for the current Icon Composer asset' >&2
+            exit 1
+          }
       - name: Build, ad-hoc sign, and verify ZIP
         run: bash scripts/build-release.sh
       - name: Check generated Cask style
