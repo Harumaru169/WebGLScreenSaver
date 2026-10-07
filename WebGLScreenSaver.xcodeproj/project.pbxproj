@@ -20,8 +20,8 @@
 		1A000066000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000067000000000000000A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000064000000000000000B /* Logger.swift */; };
 		1A000070000000000000000A /* PaperSaverKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A000070000000000000000B /* PaperSaverKit */; };
-		734603B8305AEAE8003BFCB4 /* app-icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 734603B7305AEAE8003BFCB4 /* app-icon.icon */; };
 		735F141C303A0E550007EA17 /* CoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735F141B303A0E550007EA17 /* CoreView.swift */; };
+		73793896305E350D00BDBFBB /* app-icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 73793895305E350D00BDBFBB /* app-icon.icon */; };
 		73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 73E72CA1303BF71E0061A657 /* Assets.xcassets */; };
 		73E72CBA303C18440061A657 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73E72CB9303C18440061A657 /* AboutView.swift */; };
 		7A000001000000000000000A /* SharedSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A000003000000000000000A /* SharedSettings.swift */; };
@@ -80,8 +80,8 @@
 		1A000032000000000000000B /* PluginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginManager.swift; sourceTree = "<group>"; };
 		1A000064000000000000000B /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		731972F0303ADE63001F9FE3 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
-		734603B7305AEAE8003BFCB4 /* app-icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = "app-icon.icon"; sourceTree = "<group>"; };
 		735F141B303A0E550007EA17 /* CoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreView.swift; sourceTree = "<group>"; };
+		73793895305E350D00BDBFBB /* app-icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = "app-icon.icon"; sourceTree = "<group>"; };
 		73E72CA1303BF71E0061A657 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		73E72CB9303C18440061A657 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		7A000003000000000000000A /* SharedSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedSettings.swift; sourceTree = "<group>"; };
@@ -137,7 +137,7 @@
 				1A000002000000000000000B /* WindowMainView.swift */,
 				1A000032000000000000000B /* PluginManager.swift */,
 				73E72CA1303BF71E0061A657 /* Assets.xcassets */,
-				734603B7305AEAE8003BFCB4 /* app-icon.icon */,
+				73793895305E350D00BDBFBB /* app-icon.icon */,
 				1A00000A000000000000000B /* Info.plist */,
 				1A00000B000000000000000B /* WebGLScreenSaver.entitlements */,
 			);
@@ -294,8 +294,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B000005000000000000000A /* ShaderRuntime.html in Resources */,
+				73793896305E350D00BDBFBB /* app-icon.icon in Resources */,
 				73E72CA2303BF71E0061A657 /* Assets.xcassets in Resources */,
-				734603B8305AEAE8003BFCB4 /* app-icon.icon in Resources */,
 				8B000007000000000000000A /* DefaultShader.glsl in Resources */,
 				8B000009000000000000000A /* Credits.html in Resources */,
 			);
@@ -330,7 +330,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "find \"$CODESIGNING_FOLDER_PATH\" -name '*.appex' -exec pluginkit -a {} \\;\n";
+			shellScript = "if [ \"$WEBGL_CI\" = \"1\" ]; then exit 0; fi\nfind \"$CODESIGNING_FOLDER_PATH\" -name '*.appex' -exec pluginkit -a {} \\;\n";
 		};
 		731972F1303AE0DF001F9FE3 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -348,7 +348,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nSWIFT_PACKAGE_DIR=\"${SWIFT_PACKAGE_DIR:-${BUILD_DIR%Build/*}SourcePackages}\"\nSWIFTLINT_CMD=\"$SWIFT_PACKAGE_DIR/artifacts/swiftlintplugins/SwiftLintBinary/SwiftLintBinary.artifactbundle/macos/swiftlint\"\n\nif test -f \"$SWIFTLINT_CMD\" 2>&1\nthen\n    \"$SWIFTLINT_CMD\" --fix\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#xcode-run-script-build-phase for installation instructions.\"\nfi\n";
+			shellScript = "if [ \"$WEBGL_CI\" = \"1\" ]; then exit 0; fi\n# Type a script or drag a script file from your workspace to insert its path.\nSWIFT_PACKAGE_DIR=\"${SWIFT_PACKAGE_DIR:-${BUILD_DIR%Build/*}SourcePackages}\"\nSWIFTLINT_CMD=\"$SWIFT_PACKAGE_DIR/artifacts/swiftlintplugins/SwiftLintBinary/SwiftLintBinary.artifactbundle/macos/swiftlint\"\n\nif test -f \"$SWIFTLINT_CMD\" 2>&1\nthen\n    \"$SWIFTLINT_CMD\" --fix\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#xcode-run-script-build-phase for installation instructions.\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -1,0 +1,103 @@
+name: Experimental draft release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'Harumaru169/WebGLScreenSaver'
+    runs-on: macos-26
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      RELEASE_TAG: ${{ github.ref_name }}
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate tag and protect published releases
+        id: existing
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo 'Release tag must be vX.Y.Z' >&2; exit 1;
+          }
+          draft=$(gh api --paginate "repos/$GH_REPO/releases" \
+            --jq '.[] | select(.tag_name == env.RELEASE_TAG) | .draft')
+          case "$draft" in
+            '') echo 'draft_exists=false' >> "$GITHUB_OUTPUT" ;;
+            true) echo 'draft_exists=true' >> "$GITHUB_OUTPUT" ;;
+            *) echo 'Refusing to overwrite a published release' >&2; exit 1 ;;
+          esac
+      - name: Build, ad-hoc sign, and verify ZIP
+        run: bash scripts/build-release.sh "${RELEASE_TAG#v}"
+      - name: Check generated Cask style and source
+        run: |
+          brew style dist/webgl-screen-saver.rb
+          git diff --exit-code HEAD
+      - name: Attest release ZIP
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/WebGLScreenSaver-arm64.zip
+      - name: Prepare release notes
+        shell: bash
+        run: |
+          cat > dist/release-notes.md <<'NOTES'
+          Experimental build for Apple Silicon and macOS 26 or later.
+          Ad-hoc signed; not Developer ID signed or notarized by Apple.
+          The experimental Cask removes quarantine from the installed app.
+
+          Before publishing, test extension startup and App Group settings sharing
+          on a clean Mac/VM using the exact attached ZIP. See README.md.
+          After publishing, copy the attached webgl-screen-saver.rb into
+          Harumaru169/tap/Casks/ and commit/push the Tap separately.
+
+          Verify the downloaded ZIP:
+          ```bash
+          shasum -a 256 -c SHA256SUMS
+          gh attestation verify WebGLScreenSaver-arm64.zip --repo Harumaru169/WebGLScreenSaver
+          ```
+          NOTES
+          printf '\nBuild log: https://github.com/%s/actions/runs/%s\n' \
+            "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" >> dist/release-notes.md
+      - name: Create or refresh draft only
+        env:
+          DRAFT_EXISTS: ${{ steps.existing.outputs.draft_exists }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(dist/WebGLScreenSaver-arm64.zip dist/SHA256SUMS
+                  dist/build-info.json dist/webgl-screen-saver.rb)
+          if [[ "$DRAFT_EXISTS" == true ]]; then
+            # Recheck immediately before mutation to protect manually published drafts.
+            [[ "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" == true ]]
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+            gh release edit "$RELEASE_TAG" --notes-file dist/release-notes.md
+          else
+            gh release create "$RELEASE_TAG" "${assets[@]}" --verify-tag \
+              --draft --prerelease --title "WebGLScreenSaver $RELEASE_TAG (experimental)" \
+              --notes-file dist/release-notes.md
+          fi
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-build-log-${{ github.run_id }}
+          path: dist/build.log
+          if-no-files-found: ignore
+          retention-days: 14

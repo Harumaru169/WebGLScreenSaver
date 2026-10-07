@@ -1,0 +1,45 @@
+# typed: strict
+# frozen_string_literal: true
+
+cask "webgl-screen-saver" do
+  version "@VERSION@"
+  sha256 "@SHA256@"
+
+  url "https://github.com/Harumaru169/WebGLScreenSaver/releases/download/v#{version}/WebGLScreenSaver-arm64.zip"
+  name "WebGLScreenSaver"
+  desc "WebGL shader screen saver"
+  homepage "https://github.com/Harumaru169/WebGLScreenSaver"
+
+  depends_on arch: :arm64
+  depends_on macos: ">= :tahoe"
+
+  app "WebGLScreenSaver.app"
+
+  # Custom experimental tap: quarantine removal needs a legacy flight block.
+  # rubocop:disable Cask/InstallSteps
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-rd", "com.apple.quarantine", "#{appdir}/WebGLScreenSaver.app"],
+                   sudo: false
+  end
+
+  # rubocop:enable Cask/InstallSteps
+
+  uninstall quit:   "kosei.haruyama.WebGLScreenSaver",
+            script: {
+              executable:   "/usr/bin/pluginkit",
+              args:         ["-r", "#{appdir}/WebGLScreenSaver.app/Contents/PlugIns/WebGLScreenSaverExtension.appex"],
+              sudo:         false,
+              must_succeed: false,
+            }
+
+  caveats <<~EOS
+    Experimental, ad-hoc signed build; it is not notarized by Apple.
+    Installation removes quarantine from this app and its embedded extension.
+    Open WebGLScreenSaver and use Install if the screen saver is not listed.
+    Then select it in System Settings > Screen Saver.
+    App Group settings sharing still requires validation on a clean Mac.
+    Keep only one copy of the app on each machine to avoid cached extensions.
+    Settings are preserved when uninstalling. Select another screen saver first.
+  EOS
+end

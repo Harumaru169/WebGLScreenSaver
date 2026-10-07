@@ -4,3 +4,6 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 *.xcbkptlist
+
+/dist/
+/scripts/__pycache__/
